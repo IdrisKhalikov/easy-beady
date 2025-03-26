@@ -1,6 +1,7 @@
 using EasyBeady.Api.DataContracts.SchemaContracts;
 using EasyBeady.Api.Services.SchemaRepository;
 using EasyBeady.Api.Utils;
+using Microsoft.AspNetCore.Http.HttpResults;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.Extensions.Internal;
 
@@ -33,6 +34,12 @@ public class SchemaController : ControllerBase
     {
         if(schemaUpdate == null)
             return BadRequest("Schema object is null");
+        var isNullText = SchemaUpdateIsNullValidation(schemaUpdate);
+        if (isNullText != "OK")
+            return BadRequest(isNullText);
+        var validationText = SchemaUpdateValidation(schemaUpdate);
+        if (validationText != "OK")
+            return BadRequest(validationText);
 
         var schema = new Schema
         {
@@ -56,6 +63,9 @@ public class SchemaController : ControllerBase
     {
         if(schemaUpdate == null)
             return BadRequest("Schema object is null");
+        var validationText = SchemaUpdateValidation(schemaUpdate);
+        if (validationText != "OK")
+            return BadRequest(validationText);
         var schema = schemaRepository.GetSchema(schemaId);
         if (schema == null)
             return NotFound("Schema with specified id was not found");
@@ -77,5 +87,31 @@ public class SchemaController : ControllerBase
 
         schemaRepository.UpdateSchema(schemaId, updatedSchema);
         return Ok(schemaId);
+    }
+
+    private String SchemaUpdateIsNullValidation(SchemaUpdate schemaUpdate)
+    {
+        if (schemaUpdate.Name is null) 
+            return "Name is null";
+        if (schemaUpdate.SchemaType is null)
+            return "Type is null";
+        if (schemaUpdate.LinesCompleted is null) 
+            return "Number of lines is null";
+        if (schemaUpdate.Data is null)
+            return "Data is null";
+        return "OK";
+    }
+
+    private String SchemaUpdateValidation(SchemaUpdate schemaUpdate)
+    {
+        if (schemaUpdate.Name is not null && String.IsNullOrWhiteSpace(schemaUpdate.Name)) 
+            return "Name is empty";
+        if (schemaUpdate.LinesCompleted is not null && schemaUpdate.LinesCompleted < 0) 
+            return "Number of lines is invalid";
+        if (schemaUpdate.Data is not null && schemaUpdate.Data.Count(x => x.Length > 0) == 0) 
+            return "Data is empty";
+        if (schemaUpdate.Data is not null && schemaUpdate.Data.Count(x => x.Any(y => y < 0 || y > 16777215)) > 0) 
+            return "Data is incorrect";
+        return "OK";
     }
 }
