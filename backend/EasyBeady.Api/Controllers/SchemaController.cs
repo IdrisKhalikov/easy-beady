@@ -1,7 +1,6 @@
 using EasyBeady.Api.DataContracts.SchemaContracts;
 using EasyBeady.Api.Services.SchemaRepository;
 using EasyBeady.Api.Utils;
-using Microsoft.AspNetCore.Http.HttpResults;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.Extensions.Internal;
 
@@ -41,12 +40,14 @@ public class SchemaController : ControllerBase
         if (validationText != "OK")
             return BadRequest(validationText);
 
+        var nowStr = systemClock.UtcNow.ToSortableDateString();
         var schema = new Schema
         {
             Info = new SchemaInfo
             {
                 Name = schemaUpdate.Name,
-                CreatedDate = systemClock.UtcNow.ToSortableDateString(),
+                CreatedDate = nowStr,
+                LastUpdateDate = nowStr,
                 Width = schemaUpdate.Data.Max(row => row.Length),
                 Height = schemaUpdate.Data.Length
             },
@@ -85,8 +86,8 @@ public class SchemaController : ControllerBase
             Data = schemaUpdate.Data ?? schema.Data
         };
 
-        schemaRepository.UpdateSchema(schemaId, updatedSchema);
-        return Ok(schemaId);
+        var success = schemaRepository.UpdateSchema(schemaId, updatedSchema);
+        return success ? Ok(schemaId) : NotFound(schemaId);
     }
 
     private String SchemaUpdateIsNullValidation(SchemaUpdate schemaUpdate)

@@ -1,3 +1,4 @@
+using EasyBeady.Api.Database;
 using EasyBeady.Api.Services.SchemaRepository;
 using Microsoft.Extensions.Internal;
 
@@ -9,6 +10,6 @@ public static class DependencyInjectionExtensions
     {
         return services
             .AddSingleton<ISystemClock, SystemClock>()
-            .AddSingleton<ISchemaRepository, MemorySchemaRepository>();
+            .AddTransient<ISchemaRepository, DbSchemaRepository>();
     }
 }

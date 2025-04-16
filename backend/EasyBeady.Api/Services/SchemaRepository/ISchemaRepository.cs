@@ -6,5 +6,5 @@ public interface ISchemaRepository
 {
     public Schema? GetSchema(Guid schemaId);
     public Guid SaveSchema(Schema schema);
-    public Guid? UpdateSchema(Guid schemaId, Schema schema);
+    public bool UpdateSchema(Guid schemaId, Schema schema);
 }

@@ -23,11 +23,11 @@ public class MemorySchemaRepository : ISchemaRepository
         return schemaId;
     }
 
-    public Guid? UpdateSchema(Guid schemaId, Schema schema)
+    public bool UpdateSchema(Guid schemaId, Schema schema)
     {
         if (!schemas.ContainsKey(schemaId))
-            return null;
+            return false;
         schemas[schemaId] = schema;
-        return schemaId;
+        return true;
     }
 }
