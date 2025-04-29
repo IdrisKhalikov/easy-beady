@@ -1,4 +1,6 @@
 import { JSX, useState, useEffect, useRef } from 'react';
+import { useLocation,  useNavigate } from 'react-router-dom';
+import { AppRoute } from '../../const';
 import GridField, { Cell } from '../../components/grid/grid-field';
 import Modal from '../../components/modal/modal';
 import Header from '../../components/header/header';
@@ -14,14 +16,26 @@ import PaletteIcon from '@mui/icons-material/PaletteRounded';
 import FillIcon from '@mui/icons-material/FormatColorFillRounded';
 import './sheme-edit.css';
 
+
+type SchemeType = 'square' | 'peyote';
+
 export default function ShemeEditScreen(): JSX.Element {
+  const navigate = useNavigate();
+  const location = useLocation();
+  const { 
+    title = 'Новая схема', 
+    width = 20, 
+    height = 20,
+    type = 'square'
+  } = location.state || {};
+
   const [selectedOption, setSelectedOption] = useState<'edit' | 'weave'>('edit');
   const [showDeleteModal, setShowDeleteModal] = useState(false);
   const [showSaveModal, setShowSaveModal] = useState(false);
   const [showRestartModal, setShowRestartModal] = useState(false);
-  const [gridWidth, setGridWidth] = useState(20);
-  const [gridHeight, setGridHeight] = useState(20);
-  const [cellSize, setCellSize] = useState(10);
+  const [gridWidth, setGridWidth] = useState(width);
+  const [gridHeight, setGridHeight] = useState(height);
+  const [cellSize, setCellSize] = useState(30);
   const [backgroundColor, setBackgroundColor] = useState('#ffffff');
   const [shapeColor, setShapeColor] = useState('#0000ff');
   const [grid, setGrid] = useState<Cell[]>([]);
@@ -29,10 +43,11 @@ export default function ShemeEditScreen(): JSX.Element {
   const [fillActive, setFillActive] = useState(false);
   const [zoomLevel, setZoomLevel] = useState(100);
   const [showColorPicker, setShowColorPicker] = useState(false);
+  const [schemeType, setSchemeType] = useState<SchemeType>(type);
 
   useEffect(() => {
     initializeGrid();
-  }, [gridWidth, gridHeight, backgroundColor]);
+  }, [gridWidth, gridHeight, backgroundColor, schemeType]);
 
   const initializeGrid = () => {
     const newGrid: Cell[] = [];
@@ -42,7 +57,8 @@ export default function ShemeEditScreen(): JSX.Element {
       newGrid.push({
         id: i + 1,
         color: backgroundColor,
-        isSelected: false
+        isSelected: false,
+        type: schemeType
       });
     }
     
@@ -97,14 +113,15 @@ export default function ShemeEditScreen(): JSX.Element {
   };
 
   const handleRestart = () => {
-    setGridWidth(20);
-    setGridHeight(20);
+    setGridWidth(width);
+    setGridHeight(height);
     setBackgroundColor('#ffffff');
     setShapeColor('#0000ff');
     setBrushActive(false);
     setFillActive(false);
     setZoomLevel(100);
     setCellSize(20);
+    setSchemeType(type);
     setShowRestartModal(false);
   };
 
@@ -115,6 +132,7 @@ export default function ShemeEditScreen(): JSX.Element {
   const handleDeleteButton = () => {
     console.log('Удалено');
     setShowDeleteModal(false);
+    navigate(AppRoute.Root);
   };
 
   const handleSaveButton = () => {
@@ -136,7 +154,7 @@ export default function ShemeEditScreen(): JSX.Element {
   const handleZoomChange = (event: Event, newValue: number | number[]) => {
     const value = Array.isArray(newValue) ? newValue[0] : newValue;
     setZoomLevel(value);
-    setCellSize(20 * (value / 100));
+    setCellSize(Math.round(15 * (value / 100)));
   };
 
   return (
@@ -144,7 +162,7 @@ export default function ShemeEditScreen(): JSX.Element {
       <Header/>
       <div className='main-content'>
         <div className='heading'>
-          <h2>Название схемы</h2>
+          <h2>{title}</h2>
         </div>
         <div className="nav-panel">
           <div className="mode-toggle">
@@ -330,6 +348,7 @@ export default function ShemeEditScreen(): JSX.Element {
               gridHeight={gridHeight}
               cellSize={cellSize}
               onCellClick={handleCellClick}
+              schemeType={schemeType}
             />
           </div>
         </div>

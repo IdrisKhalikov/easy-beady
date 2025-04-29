@@ -1,4 +1,5 @@
 import { useState } from 'react';
+import { useNavigate } from 'react-router-dom';
 import {
   Box,
   Typography,
@@ -17,17 +18,18 @@ interface CreateFormModalProps {
 }
 
 export default function CreateFormModal({ onClose }: CreateFormModalProps) {
-  const [width, setWidth] = useState(1);
-  const [height, setHeight] = useState(1);
+  const navigate = useNavigate();
+  const [width, setWidth] = useState(20);
+  const [height, setHeight] = useState(20);
   const [schemeName, setSchemeName] = useState('');
-  const [schemeType, setSchemeType] = useState('');
+  const [schemeType, setSchemeType] = useState<'square' | 'peyote' | ''>('');
   const [isNameError, setIsNameError] = useState(false);
   const [isTypeError, setIsTypeError] = useState(false);
 
-  const handleWidthIncrease = () => setWidth(prev => prev + 1);
-  const handleWidthDecrease = () => setWidth(prev => (prev > 1 ? prev - 1 : 1));
-  const handleHeightIncrease = () => setHeight(prev => prev + 1);
-  const handleHeightDecrease = () => setHeight(prev => (prev > 1 ? prev - 1 : 1));
+  const handleWidthIncrease = () => setWidth(prev => Math.min(prev + 1, 150));
+  const handleWidthDecrease = () => setWidth(prev => Math.max(prev - 1, 10));
+  const handleHeightIncrease = () => setHeight(prev => Math.min(prev + 1, 150));
+  const handleHeightDecrease = () => setHeight(prev => Math.max(prev - 1, 10));
 
   const handleCreateClick = () => {
     let hasErrors = false;
@@ -48,11 +50,13 @@ export default function CreateFormModal({ onClose }: CreateFormModalProps) {
 
     if (hasErrors) return;
 
-    console.log({
-      schemeName: schemeName,
-      width: width,
-      height: height,
-      type: schemeType,
+    navigate('/edit', {
+      state: {
+        title: schemeName,
+        width,
+        height,
+        type: schemeType,
+      }
     });
 
     onClose();
@@ -98,6 +102,7 @@ export default function CreateFormModal({ onClose }: CreateFormModalProps) {
           InputProps={{
             className: "text-field-input"
           }}
+          sx={{ marginBottom: '20px' }}
         />
 
         <Box className="dimensions-container">
@@ -121,10 +126,18 @@ export default function CreateFormModal({ onClose }: CreateFormModalProps) {
                   {width}
                 </Typography>
                 <Box className="number-input-buttons">
-                  <IconButton size="small" onClick={handleWidthIncrease}>
+                  <IconButton 
+                    size="small" 
+                    onClick={handleWidthIncrease}
+                    disabled={width >= 150}
+                  >
                     <KeyboardArrowUpIcon fontSize="small" />
                   </IconButton>
-                  <IconButton size="small" onClick={handleWidthDecrease}>
+                  <IconButton 
+                    size="small" 
+                    onClick={handleWidthDecrease}
+                    disabled={width <= 10}
+                  >
                     <KeyboardArrowDownIcon fontSize="small" />
                   </IconButton>
                 </Box>
@@ -153,10 +166,18 @@ export default function CreateFormModal({ onClose }: CreateFormModalProps) {
                   {height}
                 </Typography>
                 <Box className="number-input-buttons">
-                  <IconButton size="small" onClick={handleHeightIncrease}>
+                  <IconButton 
+                    size="small" 
+                    onClick={handleHeightIncrease}
+                    disabled={height >= 150}
+                  >
                     <KeyboardArrowUpIcon fontSize="small" />
                   </IconButton>
-                  <IconButton size="small" onClick={handleHeightDecrease}>
+                  <IconButton 
+                    size="small" 
+                    onClick={handleHeightDecrease}
+                    disabled={height <= 10}
+                  >
                     <KeyboardArrowDownIcon fontSize="small" />
                   </IconButton>
                 </Box>
@@ -166,18 +187,19 @@ export default function CreateFormModal({ onClose }: CreateFormModalProps) {
           </Box>
         </Box>
 
-        <Box className="scheme-type-block">
+        <Box className="scheme-type-block" sx={{ margin: '20px 0' }}>
           <Box className="scheme-type-container">
             <Typography 
               className="scheme-type-label"
               sx={{ 
                 color: isTypeError ? 'red' : 'inherit',
-                lineHeight: '100%'
+                lineHeight: '100%',
+                marginBottom: '8px'
               }}
             >
               Тип схемы:
             </Typography>
-            <Box className="scheme-type-buttons">
+            <Box className="scheme-type-buttons" sx={{ display: 'flex', gap: '8px' }}>
               <Button
                 text='Square'
                 variant={schemeType === 'square' ? 'save' : 'save-transparent'}
@@ -199,7 +221,12 @@ export default function CreateFormModal({ onClose }: CreateFormModalProps) {
             </Box>
           </Box>
           {isTypeError && (
-            <Typography sx={{ color: '#d32f2f', fontSize: '12px', marginTop: '4px', marginLeft: '14px'}}>
+            <Typography sx={{ 
+              color: '#d32f2f', 
+              fontSize: '12px', 
+              marginTop: '4px',
+              marginLeft: '14px'
+            }}>
               Выберите тип схемы
             </Typography>
           )}

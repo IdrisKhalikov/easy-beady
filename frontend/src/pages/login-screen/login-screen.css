@@ -52,3 +52,23 @@
   gap: 20px;
   width: 100%;
 }
+
+.input-group-wrapper{
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+}
+
+.input-group {
+  width: 100%;
+}
+
+.error-message {
+  color: #ff3333;
+  font-size: 12px;
+  margin-top: 4px;
+}
+
+.login-input.error {
+  border-color: #ff3333;
+}
