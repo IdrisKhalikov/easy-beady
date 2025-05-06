@@ -1,26 +1,18 @@
 import { JSX, useState, useEffect, useRef } from 'react';
-import { useLocation,  useNavigate } from 'react-router-dom';
-import { AppRoute } from '../../const';
+import { useLocation } from 'react-router-dom';
 import GridField, { Cell } from '../../components/grid/grid-field';
-import Modal from '../../components/modal/modal';
 import Header from '../../components/header/header';
+import NavigationPanel from '../../components/nav-panel/nav-panel';
 import { IconButton, Slider } from '@mui/material';
-import CloseIcon from '@mui/icons-material/Close';
-import RestartIcon from '@mui/icons-material/RestartAlt';
-import SaveIcon from '@mui/icons-material/Save';
-import EditIcon from '@mui/icons-material/Edit';
-import Grid4x4Icon from '@mui/icons-material/Grid4x4';
 import BrushIcon from '@mui/icons-material/Brush';
 import BackspaceIcon from '@mui/icons-material/Backspace';
 import PaletteIcon from '@mui/icons-material/PaletteRounded';
 import FillIcon from '@mui/icons-material/FormatColorFillRounded';
 import './sheme-edit.css';
 
-
 type SchemeType = 'square' | 'peyote';
 
 export default function ShemeEditScreen(): JSX.Element {
-  const navigate = useNavigate();
   const location = useLocation();
   const { 
     title = 'Новая схема', 
@@ -30,20 +22,17 @@ export default function ShemeEditScreen(): JSX.Element {
   } = location.state || {};
 
   const [selectedOption, setSelectedOption] = useState<'edit' | 'weave'>('edit');
-  const [showDeleteModal, setShowDeleteModal] = useState(false);
-  const [showSaveModal, setShowSaveModal] = useState(false);
-  const [showRestartModal, setShowRestartModal] = useState(false);
   const [gridWidth, setGridWidth] = useState(width);
   const [gridHeight, setGridHeight] = useState(height);
-  const [cellSize, setCellSize] = useState(30);
   const [backgroundColor, setBackgroundColor] = useState('#ffffff');
   const [shapeColor, setShapeColor] = useState('#0000ff');
   const [grid, setGrid] = useState<Cell[]>([]);
   const [brushActive, setBrushActive] = useState(false);
   const [fillActive, setFillActive] = useState(false);
   const [zoomLevel, setZoomLevel] = useState(100);
-  const [showColorPicker, setShowColorPicker] = useState(false);
   const [schemeType, setSchemeType] = useState<SchemeType>(type);
+
+  const cellSize = 15;
 
   useEffect(() => {
     initializeGrid();
@@ -120,30 +109,11 @@ export default function ShemeEditScreen(): JSX.Element {
     setBrushActive(false);
     setFillActive(false);
     setZoomLevel(100);
-    setCellSize(20);
     setSchemeType(type);
-    setShowRestartModal(false);
   };
 
-  const onClose = () => setShowDeleteModal(true);
-  const onSave = () => setShowSaveModal(true);
-  const onRestart = () => setShowRestartModal(true);
-
-  const handleDeleteButton = () => {
-    console.log('Удалено');
-    setShowDeleteModal(false);
-    navigate(AppRoute.Root);
-  };
-
-  const handleSaveButton = () => {
-    console.log('Сохранено');
-    setShowSaveModal(false);
-  };
-
-  const handleRestartButton = () => handleRestart();
-
-  const handleToggle = () => {
-    setSelectedOption(prev => (prev === 'edit' ? 'weave' : 'edit'));
+  const handleOptionChange = (option: 'edit' | 'weave') => {
+    setSelectedOption(option);
   };
 
   const handleBrushClick = () => {
@@ -154,97 +124,18 @@ export default function ShemeEditScreen(): JSX.Element {
   const handleZoomChange = (event: Event, newValue: number | number[]) => {
     const value = Array.isArray(newValue) ? newValue[0] : newValue;
     setZoomLevel(value);
-    setCellSize(Math.round(15 * (value / 100)));
   };
 
   return (
     <div className="page-container">
       <Header/>
       <div className='main-content'>
-        <div className='heading'>
-          <h2>{title}</h2>
-        </div>
-        <div className="nav-panel">
-          <div className="mode-toggle">
-            <button
-              className={`mode-toggle__button ${selectedOption === 'edit' ? 'active' : ''}`}
-              onClick={() => setSelectedOption('edit')}
-            >
-              <EditIcon fontSize="small" />
-            </button>
-            <button
-              className={`mode-toggle__button ${selectedOption === 'weave' ? 'active' : ''}`}
-              onClick={() => setSelectedOption('weave')}
-            >
-              <Grid4x4Icon fontSize="small" />
-            </button>
-          </div>
-          <div className="save-exit-actions">
-            <IconButton size="medium" className="restart-button" onClick={onRestart}>
-              <RestartIcon fontSize="medium" />
-            </IconButton>
-            <IconButton size="medium" className="save-button" onClick={onSave}>
-              <SaveIcon fontSize="medium" />
-            </IconButton>
-            <IconButton size="medium" className="close-button" onClick={onClose}>
-              <CloseIcon fontSize="medium" />
-            </IconButton>
-          </div>
-        </div>
-
-        {showDeleteModal && (
-          <Modal
-            message="Вы уверены, что не забыли сохранить схему перед закрытием?"
-            primaryButton={{
-              text: 'Закрыть',
-              variant: 'delete',
-              onClick: handleDeleteButton,
-            }}
-            secondaryButton={{
-              text: 'Отмена',
-              variant: 'delete-transparent',
-              onClick: () => setShowDeleteModal(false),
-            }}
-            onClose={() => setShowDeleteModal(false)}
-          />
-        )}
-
-        {showSaveModal && (
-          <Modal
-            title="Сохранение схемы"
-            message="Сохранить текущую схему?"
-            primaryButton={{
-              text: 'Сохранить',
-              variant: 'save',
-              onClick: handleSaveButton,
-            }}
-            secondaryButton={{
-              text: 'Отмена',
-              variant: 'save-transparent',
-              onClick: () => setShowSaveModal(false),
-            }}
-            onClose={() => setShowSaveModal(false)}
-          />
-        )}
-
-        {showRestartModal && (
-          <Modal
-            title="Сброс схемы"
-            message="Вы уверены, что хотите сбросить схему?"
-            primaryButton={{
-              text: 'Сбросить',
-              variant: 'delete',
-              onClick: handleRestartButton,
-            }}
-            secondaryButton={{
-              text: 'Отмена',
-              variant: 'delete-transparent',
-              onClick: () => setShowRestartModal(false),
-            }}
-            onClose={() => setShowRestartModal(false)}
-          />
-        )}
-
+        <NavigationPanel 
+          title={title}
+          selectedOption={selectedOption}
+          onOptionChange={handleOptionChange}
+          onRestart={handleRestart}
+        />
         <div className="edit-panel">
           <div className="tool-group">
             <input
@@ -312,11 +203,11 @@ export default function ShemeEditScreen(): JSX.Element {
               <input
                 type="number"
                 min="10"
-                max="150"
+                max="200"
                 value={gridWidth}
                 onChange={(e) => {
                   const value = parseInt(e.target.value);
-                  if (!isNaN(value) && value >= 10 && value <= 150) {
+                  if (!isNaN(value) && value >= 10 && value <= 200) {
                     setGridWidth(value);
                   }
                 }}
@@ -327,11 +218,11 @@ export default function ShemeEditScreen(): JSX.Element {
               <input
                 type="number"
                 min="10"
-                max="150"
+                max="200"
                 value={gridHeight}
                 onChange={(e) => {
                   const value = parseInt(e.target.value);
-                  if (!isNaN(value) && value >= 10 && value <= 150) {
+                  if (!isNaN(value) && value >= 10 && value <= 200) {
                     setGridHeight(value);
                   }
                 }}
@@ -341,7 +232,14 @@ export default function ShemeEditScreen(): JSX.Element {
         </div>
 
         <div className="grid-scroll-container">
-          <div className="grid-wrapper">
+          <div className="grid-wrapper"
+            style={{
+              transform: `scale(${zoomLevel / 100})`,
+              transformOrigin: '0 0',
+              width: `${gridWidth * cellSize}px`,
+              height: `${gridHeight * cellSize}px`,
+            }}
+          >
             <GridField
               grid={grid}
               gridWidth={gridWidth}

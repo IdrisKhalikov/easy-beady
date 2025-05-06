@@ -1,0 +1,17 @@
+.grid-table {
+    border-collapse: separate;
+    border-spacing: 0;
+    margin: 0 auto;
+    position: relative;
+}
+
+.grid-cell {
+    border: 1px solid rgba(0, 0, 0, 0.4);
+    box-sizing: border-box;
+    position: relative;
+}
+
+.peyote-grid .peyote-row {
+    position: relative;
+    margin-bottom: -1px;
+}
