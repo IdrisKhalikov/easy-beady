@@ -7,7 +7,6 @@ export type Cell = {
   id: number;
   color: string;
   isSelected: boolean;
-  type: SchemeType;
 };
 
 type GridFieldProps = {

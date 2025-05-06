@@ -47,7 +47,6 @@ export default function ShemeEditScreen(): JSX.Element {
         id: i + 1,
         color: backgroundColor,
         isSelected: false,
-        type: schemeType
       });
     }
     
