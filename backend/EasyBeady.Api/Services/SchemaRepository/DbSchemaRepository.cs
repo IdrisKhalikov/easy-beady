@@ -1,4 +1,3 @@
-using EasyBeady.Api.Database;
 using EasyBeady.Api.Database.Domain;
 using EasyBeady.Api.Database.Domain.Models;
 using EasyBeady.Api.DataContracts.SchemaContracts;
@@ -16,9 +15,9 @@ public class DbSchemaRepository : ISchemaRepository
         _context = context;
     }
 
-    public Schema? GetSchema(Guid schemaId)
+    public Schema? GetSchema(Guid schemaId, Guid userId)
     {
-        var schemaModel =  _context.Schemas.FirstOrDefault(s => s.SchemaId == schemaId);
+        var schemaModel =  _context.Schemas.FirstOrDefault(s => s.SchemaId == schemaId && s.UserId == userId);
         return schemaModel == null ? null : ConvertModelToSchema(schemaModel);
     }
 
@@ -32,16 +31,16 @@ public class DbSchemaRepository : ISchemaRepository
         return schema.Info.SchemaId;
     }
 
-    public bool UpdateSchema(Guid schemaId, Schema schema)
+    public bool UpdateSchema(Guid schemaId, Guid userId, Schema schema)
     {
-        var schemaModel = _context.Schemas.Find(schemaId);
+        var schemaModel = _context.Schemas.FirstOrDefault(s => s.SchemaId == schemaId && s.UserId == userId);
         if(schemaModel == null)
             return false;
         schema.Info.SchemaId = schemaId;
         var newModel = ConvertSchemaToModel(schema);
         _context.Entry(schemaModel).CurrentValues.SetValues(newModel);
         _context.SaveChanges();
-        return true;;
+        return true;
     }
 
     private static Schema ConvertModelToSchema(SchemaModel model)
@@ -50,6 +49,7 @@ public class DbSchemaRepository : ISchemaRepository
             Info = new SchemaInfo
             {
                 SchemaId = model.SchemaId,
+                UserId = model.UserId,
                 Name = model.Name,
                 SchemaType = Enum.Parse<SchemaType>(model.Type),
                 Width = model.Width,
@@ -65,7 +65,7 @@ public class DbSchemaRepository : ISchemaRepository
         => new()
         {
             SchemaId = schema.Info.SchemaId,
-            UserId = schema.Info.SchemaId, // Сделано временно
+            UserId = schema.Info.UserId,
             Name = schema.Info.Name,
             Type = schema.Info.SchemaType.ToString(),
             Width = schema.Info.Width,

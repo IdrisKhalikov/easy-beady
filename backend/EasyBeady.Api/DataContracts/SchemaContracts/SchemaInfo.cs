@@ -12,6 +12,9 @@ public class SchemaInfo
     [DataMember(Name = "schemaId")]
     public Guid SchemaId { get; set; }
 
+    [DataMember(Name = "userId")]
+    public Guid UserId { get; set; }
+
     [JsonConverter(typeof(JsonStringEnumConverter))]
     [DataMember(Name="schemaType")]
     public SchemaType SchemaType { get; set; }
