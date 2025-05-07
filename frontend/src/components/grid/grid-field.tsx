@@ -16,6 +16,8 @@ type GridFieldProps = {
   cellSize: number;
   onCellClick: (cellId: number) => void;
   schemeType: SchemeType;
+  mode: 'edit' | 'weave';
+  markedColumns: { [key: number]: boolean };
 };
 
 export default function GridField({
@@ -24,20 +26,35 @@ export default function GridField({
   gridHeight,
   cellSize,
   onCellClick,
-  schemeType
+  schemeType,
+  mode,
+  markedColumns
 }: GridFieldProps): JSX.Element {
-  const renderCell = (cell: Cell) => (
-    <td
-      key={`cell-${cell.id}`}
-      className="grid-cell"
-      style={{
-        backgroundColor: cell.color,
-        width: `${cellSize}px`,
-        height: `${cellSize}px`
-      }}
-      onClick={() => onCellClick(cell.id)}
-    />
-  );
+  const renderCell = (cell: Cell) => {
+    const columnIndex = (cell.id - 1) % gridWidth;
+    const isColumnMarked = markedColumns[columnIndex];
+    
+    return (
+      <td
+        key={`cell-${cell.id}`}
+        className={`grid-cell ${isColumnMarked ? 'marked-column' : ''}`}
+        style={{
+          backgroundColor: cell.color,
+          width: `${cellSize}px`,
+          height: `${cellSize}px`,
+          position: 'relative'
+        }}
+        onClick={() => onCellClick(cell.id)}
+      >
+        {mode === 'weave' && (
+          <div className="grid-cell-number">
+            {columnIndex + 1}
+          </div>
+        )}
+        {isColumnMarked && <div className="column-overlay" />}
+      </td>
+    );
+  };
 
   const renderRow = (rowIndex: number) => {
     const cells = [];

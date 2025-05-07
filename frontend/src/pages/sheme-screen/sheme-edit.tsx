@@ -11,6 +11,9 @@ import FillIcon from '@mui/icons-material/FormatColorFillRounded';
 import './sheme-edit.css';
 
 type SchemeType = 'square' | 'peyote';
+type ColumnState = {
+  [columnIndex: number]: boolean;
+};
 
 export default function ShemeEditScreen(): JSX.Element {
   const location = useLocation();
@@ -31,8 +34,10 @@ export default function ShemeEditScreen(): JSX.Element {
   const [fillActive, setFillActive] = useState(false);
   const [zoomLevel, setZoomLevel] = useState(100);
   const [schemeType, setSchemeType] = useState<SchemeType>(type);
+  const [markedColumns, setMarkedColumns] = useState<ColumnState>({});
 
   const cellSize = 15;
+  const colorPickerRef = useRef<HTMLInputElement>(null);
 
   useEffect(() => {
     initializeGrid();
@@ -51,9 +56,8 @@ export default function ShemeEditScreen(): JSX.Element {
     }
     
     setGrid(newGrid);
+    setMarkedColumns({});
   };
-
-  const colorPickerRef = useRef<HTMLInputElement>(null);
 
   const handlePaletteClick = () => {
     if (colorPickerRef.current) {
@@ -62,18 +66,26 @@ export default function ShemeEditScreen(): JSX.Element {
   };
 
   const handleCellClick = (cellId: number) => {
-    if (brushActive) {
-      setGrid(prevGrid => 
-        prevGrid.map(cell => {
-          if (cell.id !== cellId) return cell;
-          
-          return {
-            ...cell,
-            isSelected: true,
-            color: shapeColor
-          };
-        })
-      );
+    if (selectedOption === 'edit') {
+      if (brushActive) {
+        setGrid(prevGrid => 
+          prevGrid.map(cell => {
+            if (cell.id !== cellId) return cell;
+            
+            return {
+              ...cell,
+              isSelected: true,
+              color: shapeColor
+            };
+          })
+        );
+      }
+    } else if (selectedOption === 'weave') {
+      const columnIndex = (cellId - 1) % gridWidth;
+      setMarkedColumns(prev => ({
+        ...prev,
+        [columnIndex]: !prev[columnIndex]
+      }));
     }
   };
 
@@ -98,6 +110,9 @@ export default function ShemeEditScreen(): JSX.Element {
         color: backgroundColor
       }))
     );
+    if (selectedOption === 'weave') {
+      setMarkedColumns({});
+    }
   };
 
   const handleRestart = () => {
@@ -109,10 +124,14 @@ export default function ShemeEditScreen(): JSX.Element {
     setFillActive(false);
     setZoomLevel(100);
     setSchemeType(type);
+    setMarkedColumns({});
   };
 
   const handleOptionChange = (option: 'edit' | 'weave') => {
     setSelectedOption(option);
+    if (option === 'edit') {
+      setMarkedColumns({});
+    }
   };
 
   const handleBrushClick = () => {
@@ -135,100 +154,103 @@ export default function ShemeEditScreen(): JSX.Element {
           onOptionChange={handleOptionChange}
           onRestart={handleRestart}
         />
-        <div className="edit-panel">
-          <div className="tool-group">
-            <input
-              type="color"
-              ref={colorPickerRef}
-              value={shapeColor}
-              onChange={(e) => setShapeColor(e.target.value)}
-              className="color-picker"
-            />
-            <IconButton
-              size="medium"
-              className="edit-button"
-              onClick={handlePaletteClick}
-              title="Палитра"
-            >
-              <PaletteIcon fontSize="medium" />
-            </IconButton>
-            
-            <IconButton
-              size="medium"
-              className={`edit-button ${brushActive ? 'active' : ''}`}
-              onClick={handleBrushClick}
-              title="Кисточка"
-              disabled={!shapeColor}
-            >
-              <BrushIcon fontSize="medium" />
-            </IconButton>
-            
-            <IconButton
-              size="medium"
-              className={`edit-button ${fillActive ? 'active' : ''}`}
-              onClick={handleFillClick}
-              title="Заливка"
-              disabled={!shapeColor}
-            >
-              <FillIcon fontSize="medium" />
-            </IconButton>
-
-            <IconButton
-              size="medium"
-              className="erase-button"
-              onClick={handleClearGrid}
-              title="Очистить"
-            >
-              <BackspaceIcon fontSize="medium" />
-            </IconButton>
-
-            <div className="zoom-controls">
-              <Slider
-                value={zoomLevel}
-                onChange={handleZoomChange}
-                min={50}
-                max={200}
-                step={10}
-                valueLabelDisplay="auto"
-                valueLabelFormat={(value) => `${value}%`}
-                sx={{ width: 100 }}
+        
+        {selectedOption === 'edit' && (
+          <div className="edit-panel">
+            <div className="tool-group">
+              <input
+                type="color"
+                ref={colorPickerRef}
+                value={shapeColor}
+                onChange={(e) => setShapeColor(e.target.value)}
+                className="color-picker"
               />
+              <IconButton
+                size="medium"
+                className="edit-button"
+                onClick={handlePaletteClick}
+                title="Палитра"
+              >
+                <PaletteIcon fontSize="medium" />
+              </IconButton>
+              
+              <IconButton
+                size="medium"
+                className={`edit-button ${brushActive ? 'active' : ''}`}
+                onClick={handleBrushClick}
+                title="Кисточка"
+                disabled={!shapeColor}
+              >
+                <BrushIcon fontSize="medium" />
+              </IconButton>
+              
+              <IconButton
+                size="medium"
+                className={`edit-button ${fillActive ? 'active' : ''}`}
+                onClick={handleFillClick}
+                title="Заливка"
+                disabled={!shapeColor}
+              >
+                <FillIcon fontSize="medium" />
+              </IconButton>
+
+              <IconButton
+                size="medium"
+                className="erase-button"
+                onClick={handleClearGrid}
+                title="Очистить"
+              >
+                <BackspaceIcon fontSize="medium" />
+              </IconButton>
+
+              <div className="zoom-controls">
+                <Slider
+                  value={zoomLevel}
+                  onChange={handleZoomChange}
+                  min={50}
+                  max={200}
+                  step={10}
+                  valueLabelDisplay="auto"
+                  valueLabelFormat={(value) => `${value}%`}
+                  sx={{ width: 100 }}
+                />
+              </div>
+            </div>
+
+            <div className="grid-controls">
+              <div className="grid-control">
+                <label>Ширина</label>
+                <input
+                  type="number"
+                  min="10"
+                  max="200"
+                  value={gridWidth}
+                  onChange={(e) => {
+                    const value = parseInt(e.target.value);
+                    if (!isNaN(value) && value >= 10 && value <= 200) {
+                      setGridWidth(value);
+                    }
+                  }}
+                />
+              </div>
+              <div className="grid-control">
+                <label>Высота</label>
+                <input
+                  type="number"
+                  min="10"
+                  max="200"
+                  value={gridHeight}
+                  onChange={(e) => {
+                    const value = parseInt(e.target.value);
+                    if (!isNaN(value) && value >= 10 && value <= 200) {
+                      setGridHeight(value);
+                    }
+                  }}
+                />
+              </div>
             </div>
           </div>
-
-          <div className="grid-controls">
-            <div className="grid-control">
-              <label>Ширина</label>
-              <input
-                type="number"
-                min="10"
-                max="200"
-                value={gridWidth}
-                onChange={(e) => {
-                  const value = parseInt(e.target.value);
-                  if (!isNaN(value) && value >= 10 && value <= 200) {
-                    setGridWidth(value);
-                  }
-                }}
-              />
-            </div>
-            <div className="grid-control">
-              <label>Высота</label>
-              <input
-                type="number"
-                min="10"
-                max="200"
-                value={gridHeight}
-                onChange={(e) => {
-                  const value = parseInt(e.target.value);
-                  if (!isNaN(value) && value >= 10 && value <= 200) {
-                    setGridHeight(value);
-                  }
-                }}
-              />
-            </div>
-          </div>
-        </div>
+        )}
 
         <div className="grid-scroll-container">
           <div className="grid-wrapper"
@@ -246,6 +268,8 @@ export default function ShemeEditScreen(): JSX.Element {
               cellSize={cellSize}
               onCellClick={handleCellClick}
               schemeType={schemeType}
+              mode={selectedOption}
+              markedColumns={markedColumns}
             />
           </div>
         </div>
