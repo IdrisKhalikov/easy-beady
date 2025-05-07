@@ -10,7 +10,7 @@ public class MemorySchemaRepository : ISchemaRepository
     {
     }
 
-    public Schema? GetSchema(Guid schemaId)
+    public Schema? GetSchema(Guid schemaId, Guid userId)
     {
         return schemas.GetValueOrDefault(schemaId);
     }
@@ -23,7 +23,7 @@ public class MemorySchemaRepository : ISchemaRepository
         return schemaId;
     }
 
-    public bool UpdateSchema(Guid schemaId, Schema schema)
+    public bool UpdateSchema(Guid schemaId, Guid userId, Schema schema)
     {
         if (!schemas.ContainsKey(schemaId))
             return false;

@@ -1,36 +1,51 @@
+using EasyBeady.Api.Database.Auth.Models;
 using EasyBeady.Api.DataContracts.SchemaContracts;
 using EasyBeady.Api.Services.SchemaRepository;
 using EasyBeady.Api.Utils;
+using Google.Apis.Auth.AspNetCore3;
+using Microsoft.AspNetCore.Authorization;
+using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.Extensions.Internal;
 
 namespace EasyBeady.Api.Controllers;
 
 [Route("api/schemas")]
+[Authorize]
 public class SchemaController : ControllerBase
 {
     private readonly ISystemClock systemClock;
     private readonly ISchemaRepository schemaRepository;
+    private readonly UserManager<AppUser> userManager;
 
-    public SchemaController(ISystemClock systemClock, ISchemaRepository schemaRepository)
+    public SchemaController(
+        ISystemClock systemClock,
+        ISchemaRepository schemaRepository,
+        UserManager<AppUser> userManager)
     {
         this.systemClock = systemClock;
         this.schemaRepository = schemaRepository;
+        this.userManager = userManager;
     }
 
     [HttpGet]
     [Route("{schemaId:guid}")]
-    public ActionResult<Schema> GetSchema(Guid schemaId)
+    public async Task<ActionResult<Schema>> GetSchema(Guid schemaId)
     {
-        var result = schemaRepository.GetSchema(schemaId);
+        /* TODO: Есть метод userManager.GetUserId, он не ходит в Store, но возвращает строку
+        Нужно посмотреть, совпадает ли наш кастомный id в виде guid-а с содержимым этой строки, и если что перейти на этот метод.*/
+        var userId = (await userManager.GetUserAsync(User)).Id;
+        var result = schemaRepository.GetSchema(schemaId, userId);
         if(result != null)
             return Ok(result);
         return NotFound("Schema with specified id was not found");
     }
 
     [HttpPut]
-    public ActionResult<Guid> PutSchema([FromBody] SchemaUpdate? schemaUpdate)
+    public async Task<ActionResult<Guid>> PutSchema([FromBody] SchemaUpdate? schemaUpdate)
     {
+        var user = (await userManager.GetUserAsync(User));
+        var userId = user.Id;
         if(schemaUpdate == null)
             return BadRequest("Schema object is null");
         var isNullText = SchemaUpdateIsNullValidation(schemaUpdate);
@@ -46,6 +61,7 @@ public class SchemaController : ControllerBase
             Info = new SchemaInfo
             {
                 Name = schemaUpdate.Name,
+                UserId = userId,
                 CreatedDate = nowStr,
                 LastUpdateDate = nowStr,
                 Width = schemaUpdate.Data.Max(row => row.Length),
@@ -60,14 +76,15 @@ public class SchemaController : ControllerBase
 
     [HttpPost]
     [Route("{schemaId:guid}")]
-    public ActionResult<Guid> UpdateSchema(Guid schemaId, [FromBody] SchemaUpdate? schemaUpdate)
+    public async Task<ActionResult<Guid>> UpdateSchema(Guid schemaId, [FromBody] SchemaUpdate? schemaUpdate)
     {
         if(schemaUpdate == null)
             return BadRequest("Schema object is null");
         var validationText = SchemaUpdateValidation(schemaUpdate);
         if (validationText != "OK")
             return BadRequest(validationText);
-        var schema = schemaRepository.GetSchema(schemaId);
+        var userId = (await userManager.GetUserAsync(User)).Id;
+        var schema = schemaRepository.GetSchema(schemaId, userId);
         if (schema == null)
             return NotFound("Schema with specified id was not found");
 
@@ -86,7 +103,7 @@ public class SchemaController : ControllerBase
             Data = schemaUpdate.Data ?? schema.Data
         };
 
-        var success = schemaRepository.UpdateSchema(schemaId, updatedSchema);
+        var success = schemaRepository.UpdateSchema(schemaId, userId, updatedSchema);
         return success ? Ok(schemaId) : NotFound(schemaId);
     }
 
