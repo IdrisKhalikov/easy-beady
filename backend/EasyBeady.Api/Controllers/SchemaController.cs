@@ -107,7 +107,8 @@ public class SchemaController : ControllerBase
         return success ? Ok(schemaId) : NotFound(schemaId);
     }
 
-    private String SchemaUpdateIsNullValidation(SchemaUpdate schemaUpdate)
+    //TODO: Вынести валидацию в отдельный Helper-класс
+    private string SchemaUpdateIsNullValidation(SchemaUpdate schemaUpdate)
     {
         if (schemaUpdate.Name is null) 
             return "Name is null";
@@ -120,7 +121,7 @@ public class SchemaController : ControllerBase
         return "OK";
     }
 
-    private String SchemaUpdateValidation(SchemaUpdate schemaUpdate)
+    private string SchemaUpdateValidation(SchemaUpdate schemaUpdate)
     {
         if (schemaUpdate.Name is not null && String.IsNullOrWhiteSpace(schemaUpdate.Name)) 
             return "Name is empty";
