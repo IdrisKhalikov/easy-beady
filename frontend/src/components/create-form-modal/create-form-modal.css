@@ -1,0 +1,137 @@
+.modal-overlay {
+  position: fixed;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background-color: rgba(0, 0, 0, 0.5);
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  z-index: 1000;
+}
+
+.create-form-modal {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+  padding: 24px;
+  gap: 16px;
+  width: 380px;
+  max-width: 90%;
+  background: #FFFFFF;
+  border-radius: 6px;
+  box-sizing: border-box;
+}
+
+.modal-header {
+  display: flex;
+  flex-direction: row;
+  justify-content: space-between;
+  align-items: center;
+  width: 100%;
+  border-bottom: 1px solid #E6E6E6;
+  padding-bottom: 0;
+}
+
+.dimensions-container {
+  display: flex;
+  flex-direction: row;
+  justify-content: space-between;
+  align-items: flex-start;
+  width: 100%;
+  padding: 0 20px;
+  gap: 21px;
+  box-sizing: border-box;
+}
+
+.number-input-wrapper {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 5px;
+  width: 50%; 
+  height: 104px;
+  box-sizing: border-box;
+}
+
+.number-input {
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  align-items: center;
+  width: 100%;
+  height: 79px;
+  border: 1px solid #C8C8C8;
+  border-radius: 5px;
+}
+
+.dimension-label {
+  font-family: "Montserrat", sans-serif;
+  font-size: 14px;
+  line-height: 142%;
+  text-align: center;
+  letter-spacing: 0.02em;
+  color: #433E44;
+}
+
+.scheme-type-block {
+  display: flex;
+  flex-direction: column;
+  width: 100%;
+  padding: 0 8px;
+  box-sizing: border-box;
+}
+
+.scheme-type-container {
+  display: flex;
+  flex-direction: row;
+  justify-content: space-between;
+  align-items: center;
+  width: 100%;
+  gap: 10px;
+}
+
+.scheme-type-label {
+  font-family: "Montserrat", sans-serif;
+  font-weight: 600;
+  font-size: 16px;
+  line-height: 140%;
+  letter-spacing: 0.01em;
+  color: #433E44;
+}
+
+.scheme-type-buttons {
+  display: flex;
+  flex-direction: row;
+  gap: 5px;
+}
+
+.scheme-type-button {
+  height: 100% !important;
+}
+
+.number-input-content {
+  display: flex;
+  flex-direction: row;
+  justify-content: end;
+  align-items: center;
+  width: 100%;
+  gap: 20px;
+}
+
+.number-input-buttons {
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  align-items: center;
+  gap: 6px;
+}
+
+.text-field-input {
+  font-family: "Montserrat", sans-serif;
+}
+
+.text-field-label {
+  font-family: "Montserrat", sans-serif;
+}

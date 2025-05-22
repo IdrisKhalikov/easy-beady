@@ -1,0 +1,53 @@
+.heading{
+    position: sticky;
+}
+
+.heading h2{
+    font-weight: 300;
+}
+
+.nav-panel{
+    display: flex;
+    flex-direction: row;
+    justify-content: space-between;
+}
+
+.mode-toggle {
+    display: flex;
+    flex-direction: row;
+    align-items: center;
+    padding: 2px 4px;
+    gap: 10px;
+    width: 66px;
+    height: 30px;
+    background: #3048EA;
+    border-radius: 30px;
+}
+
+.mode-toggle__button {
+    width: 26px;
+    height: 26px;
+    border-radius: 50%;
+    border: none;
+    background: transparent;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    cursor: pointer;
+    padding: 0;
+    color: rgba(255, 255, 255, 0.7);
+    transition: all 0.3s ease;
+}
+
+.mode-toggle__button.active {
+    background: white;
+    color: #3048EA;
+}
+
+.mode-toggle__button:hover {
+    color: white;
+}
+
+.mode-toggle__button.active:hover {
+    color: #3048EA;
+}

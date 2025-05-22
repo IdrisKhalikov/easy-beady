@@ -1,0 +1,100 @@
+.button {
+  box-sizing: border-box;
+  display: inline-flex;
+  justify-content: center;
+  align-items: center;
+  gap: 8px;
+  margin: 0;
+  font-family: 'Montserrat', sans-serif;
+  font-weight: 400;
+  width: 100%;
+  font-size: 16px;
+  line-height: 22px;
+  border-radius: 4px;
+  cursor: pointer;
+  transition: all 0.2s ease;
+  border: none;
+  outline: none;
+  position: relative;
+}
+
+.button-icon {
+  display: flex;
+  align-items: center;
+}
+
+.button-text {
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.button.save {
+  padding: 8px 24px;
+  background: #3048EA;
+  color: #FFFFFF;
+}
+
+.button.save:hover {
+  background: #2639D1;
+}
+
+.button.save-transparent {
+  padding: 8px 24px;
+  background: #DADEF9;
+  border: 1px solid #001BCD;
+  color: #001BCD;
+}
+
+.button.save-transparent:hover {
+  background: #C8D0F7;
+}
+
+.button.delete {
+  padding: 8px 24px;
+  background: #EB3333;
+  color: #FFFFFF;
+}
+
+.button.delete:hover {
+  background: #D20D00;
+}
+
+.button.delete-transparent {
+  padding: 8px 24px;
+  background: #FCF0F0;
+  border: 1px solid #D20D00;
+  color: #D20D00;
+}
+
+.button.delete-transparent:hover {
+  background: #F9E0E0;
+}
+
+.button.for-loggin-form {
+  padding: 8px 24px;
+  width: 100%;
+  background: #3048EA;
+  color: #FFFFFF;
+}
+
+.button.for-loggin-form:hover {
+  background: #2639D1;
+}
+
+.button.img-icon {
+  padding: 0;
+  background: transparent;
+  border-radius: 10%;
+}
+
+.button.img-icon:hover {
+  background: rgba(0, 0, 0, 0.05);
+}
+
+.button.disabled {
+  background: #E0E0E0 !important;
+  color: #A0A0A0 !important;
+  border-color: #E0E0E0 !important;
+  cursor: not-allowed;
+}
