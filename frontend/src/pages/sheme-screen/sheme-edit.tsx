@@ -1,5 +1,5 @@
-import { JSX, useState, useEffect, useRef } from 'react';
-import { useLocation } from 'react-router-dom';
+import React, { JSX, useState, useEffect, useRef, useMemo } from 'react';
+import { Navigate, useParams } from 'react-router-dom';
 import GridField, { Cell } from '../../components/grid/grid-field';
 import Header from '../../components/header/header';
 import NavigationPanel from '../../components/nav-panel/nav-panel';
@@ -9,31 +9,68 @@ import BackspaceIcon from '@mui/icons-material/Backspace';
 import PaletteIcon from '@mui/icons-material/PaletteRounded';
 import FillIcon from '@mui/icons-material/FormatColorFillRounded';
 import './sheme-edit.css';
+import { useAppSelector } from 'hooks/use-app-selector';
+import { getIsSchemaLoading, getSchema } from 'store/slices/schema-data/selectors';
+import { useAppDispatch } from 'hooks/use-app-dispatch';
+import { fetchSchemaAction, updateSchemaAction } from 'store/api-actions/schema-api-actions';
+import Spinner from 'components/spinner/spinner';
+import { Schema } from 'types/schema';
+import { SchemaType } from 'types/schema-preview';
+import { SchemaUpdate } from 'types/schema-update';
+import { gridFromApiFormat, gridToApiFormat } from 'utils/grid';
+import { AppRoute } from 'const';
 
-type SchemeType = 'square' | 'peyote';
+
 type ColumnState = {
   [columnIndex: number]: boolean;
 };
 
-export default function ShemeEditScreen(): JSX.Element {
-  const location = useLocation();
-  const { 
-    title = 'Новая схема', 
-    width = 20, 
-    height = 20,
-    type = 'square'
-  } = location.state || {};
+// На страничке ниже используются хуки, у которых начальное состояние задается параметрами схемы.
+// Т.к. данные получаем асинхронно, сразу их вызывать не получится, поэтому пока сделал обертку
+export default function EditScreenWrapper(): JSX.Element {
+  const { schemaId } = useParams();
+  const dispatch = useAppDispatch();
+  const schema = useAppSelector(getSchema);
+  const isSchemaLoading = useAppSelector(getIsSchemaLoading);
+
+  useMemo(() => {
+    if(schemaId) {
+      dispatch(fetchSchemaAction(schemaId));
+    }
+  }, [dispatch, schemaId]);
+
+  if(isSchemaLoading) {
+    return <Spinner />
+  }
+
+  if(schema == null) {
+    return <Navigate to={AppRoute.NotFound} />
+  }
+
+  return <MemoSchemeEditScreen schema={schema!}/>
+}
+
+const MemoSchemeEditScreen = React.memo(ShemeEditScreen);
+
+type ShemeEditScreenProps = {
+  schema: Schema
+}
+
+function ShemeEditScreen({schema}: ShemeEditScreenProps): JSX.Element {
+  const { name, schemaType, width, height } = schema.info;
+  const initialGridState = useMemo(() => gridFromApiFormat(schema.data, width, height), [schema]);
+  const dispatch = useAppDispatch();
 
   const [selectedOption, setSelectedOption] = useState<'edit' | 'weave'>('edit');
   const [gridWidth, setGridWidth] = useState(width);
   const [gridHeight, setGridHeight] = useState(height);
   const [backgroundColor, setBackgroundColor] = useState('#ffffff');
   const [shapeColor, setShapeColor] = useState('#0000ff');
-  const [grid, setGrid] = useState<Cell[]>([]);
+  const [grid, setGrid] = useState<Cell[]>(initialGridState);
   const [brushActive, setBrushActive] = useState(false);
   const [fillActive, setFillActive] = useState(false);
   const [zoomLevel, setZoomLevel] = useState(100);
-  const [schemeType, setSchemeType] = useState<SchemeType>(type);
+  const [schemeType, setSchemeType] = useState<SchemaType>(schemaType);
   const [markedColumns, setMarkedColumns] = useState<ColumnState>({});
 
   const cellSize = 15;
@@ -50,11 +87,10 @@ export default function ShemeEditScreen(): JSX.Element {
     for (let i = 0; i < cellCount; i++) {
       newGrid.push({
         id: i + 1,
-        color: backgroundColor,
+        color: i >= grid.length ? backgroundColor : grid[i].color,
         isSelected: false,
       });
     }
-    
     setGrid(newGrid);
     setMarkedColumns({});
   };
@@ -123,7 +159,7 @@ export default function ShemeEditScreen(): JSX.Element {
     setBrushActive(false);
     setFillActive(false);
     setZoomLevel(100);
-    setSchemeType(type);
+    setSchemeType(schemaType);
     setMarkedColumns({});
   };
 
@@ -144,14 +180,26 @@ export default function ShemeEditScreen(): JSX.Element {
     setZoomLevel(value);
   };
 
+  const handleSave = () => {
+    const schemaUpdate: SchemaUpdate = {
+      name,
+      schemaType,
+      linesCompleted: Object.entries(markedColumns).length,
+      data: gridToApiFormat(grid, gridWidth, gridHeight)
+    }
+
+    dispatch(updateSchemaAction({...schemaUpdate, id: schema.info.schemaId} ));
+  };
+
   return (
     <div className="page-container">
       <Header/>
       <div className='main-content'>
         <NavigationPanel 
-          title={title}
+          title={name}
           selectedOption={selectedOption}
           onOptionChange={handleOptionChange}
+          onSave={handleSave}
           onRestart={handleRestart}
         />
         

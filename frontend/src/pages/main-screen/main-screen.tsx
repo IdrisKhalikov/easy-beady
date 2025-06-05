@@ -1,40 +1,30 @@
-import { JSX, useState } from 'react';
+import { JSX, useRef, useState } from 'react';
 import Modal from '../../components/modal/modal';
 import Button from '../../components/button/button';
 import CreateFormModal from 'components/create-form-modal/create-form-modal';
 import './main-screen.css';
-import ShemeCard from 'components/sheme-card/sheme-card';
 import AddIcon from '@mui/icons-material/Add';
 import Header from '../../components/header/header';
+import SchemasList from 'components/schemas-list/schemas-list';
+import { useAppSelector } from 'hooks/use-app-selector';
+import { getIsSchemasLoading, getSchemas } from 'store/slices/schemas-data/selectors';
+import { useAppDispatch } from 'hooks/use-app-dispatch';
+import { fetchSchemasAction } from 'store/api-actions/schemas-api-actions';
+import Spinner from 'components/spinner/spinner';
+import { deleteSchemaAction } from 'store/api-actions/schema-api-actions';
 
 export default function MainScreen(): JSX.Element {
-  const [cards, setCards] = useState([
-    { id: 1, title: 'Схема 1', status: 'default' },
-    { id: 2, title: 'Схема 2', status: 'done' },
-    { id: 3, title: 'Схема 3', status: 'deleted' },
-    { id: 4, title: 'Схема 1', status: 'default' },
-    { id: 5, title: 'Схема 2', status: 'done' },
-    { id: 6, title: 'Схема 3', status: 'deleted' },
-    { id: 7, title: 'Схема 1', status: 'default' },
-    { id: 8, title: 'Схема 2', status: 'done' },
-    { id: 9, title: 'Схема 3', status: 'deleted' },
-    { id: 10, title: 'Схема 1', status: 'default' },
-    { id: 11, title: 'Схема 2', status: 'done' },
-    { id: 12, title: 'Схема 3', status: 'deleted' },
-    { id: 13, title: 'Схема 1', status: 'default' },
-    { id: 14, title: 'Схема 2', status: 'done' },
-    { id: 15, title: 'Схема 3', status: 'deleted' },
-    { id: 16, title: 'Схема 1', status: 'default' },
-    { id: 17, title: 'Схема 2', status: 'done' },
-    { id: 18, title: 'Схема 3', status: 'deleted' },
-  ]);
+  const dispatch = useAppDispatch();
+  const isFirstFetch = useRef(true);
+  const isSchemasLoading = useAppSelector(getIsSchemasLoading);
+  const schemas = useAppSelector(getSchemas);
 
-  const [currentCardToDelete, setCurrentCardToDelete] = useState<number | null>(null);
+  const [currentCardToDelete, setCurrentCardToDelete] = useState<string | null>(null);
   const [showDeleteModal, setShowDeleteModal] = useState(false);
   const [showCreateModal, setShowCreateModal] = useState(false);
 
-  const handleDelete = (id: number) => {
-    setCards((prev) => prev.filter((card) => card.id !== id));
+  const handleDelete = (id: string) => {
+    dispatch(deleteSchemaAction(id));
     setShowDeleteModal(false);
     setCurrentCardToDelete(null);
   };
@@ -44,10 +34,19 @@ export default function MainScreen(): JSX.Element {
       handleDelete(currentCardToDelete);
     }
   };
-  const handleCardDeleteClick = (id: number) => {
+  const handleCardDeleteClick = (id: string) => {
     setCurrentCardToDelete(id);
     setShowDeleteModal(true);
   };
+
+  if(isFirstFetch.current) {
+    if(!isSchemasLoading) {
+      dispatch(fetchSchemasAction());
+    }
+
+    isFirstFetch.current = false;
+    return <Spinner />
+  }
 
   return (
     <div className="page-container">
@@ -78,17 +77,7 @@ export default function MainScreen(): JSX.Element {
             onClose={() => setShowCreateModal(false)}
           />
         )}
-        <div className='cards-container'>
-          {cards.map((card) => (
-            <ShemeCard
-              key={card.id}
-              title={card.title}
-              img='https://detisun.ru/foto/4341/pletenie_iz_bisera_dlia_detei_7_let_poetapno_dlia_nachinaiushchikh_4.webp'
-              status={card.status as 'default' | 'done' | 'deleted'}
-              onDelete={() => handleCardDeleteClick(card.id)}
-            />
-          ))}
-        </div>
+        <SchemasList schemas={schemas} handleSchemaDelete={handleCardDeleteClick}/>
         <Button 
           className='button-create' 
           text='Создать' 

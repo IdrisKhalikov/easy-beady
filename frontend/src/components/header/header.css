@@ -35,10 +35,21 @@
 }
 
 .avatar {
+  position: relative;
   width: 40px;
   height: 40px;
   background: #ccc;
+  overflow: hidden;
   border-radius: 50%;
+}
+
+.avatar img {
+  width: 40px;
+  height: 40px;
+  position: absolute;
+  top:50%;
+  left:50%;
+  transform: translate(-50%,-50%)
 }
 
 .dropdown-menu {

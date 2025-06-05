@@ -1,13 +1,19 @@
-import { useState } from 'react';
-import { useNavigate } from 'react-router-dom';
+import { useContext, useState } from 'react';
+import { Navigate, useNavigate } from 'react-router-dom';
 import VisibilityOff from '@mui/icons-material/VisibilityOff';
 import Visibility from '@mui/icons-material/Visibility';
 import GoogleIcon from '@mui/icons-material/Google';
 import Button from '../../components/button/button';
-import { AppRoute } from '../../const';
+import { ApiRoute, APP_URL, AppRoute } from '../../const';
 import './login-screen.css';
+import { BACKEND_URL } from 'services/api';
+import { useAppSelector } from 'hooks/use-app-selector';
+import { getAuthoriztionStatus } from 'store/slices/user-data/selectors';
+import { AuthorizationStatus } from 'types/user';
 
 export default function LoginPage() {
+  const authStatus = useAppSelector(getAuthoriztionStatus);
+
   const [showPassword, setShowPassword] = useState(false);
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
@@ -55,9 +61,14 @@ export default function LoginPage() {
     }
   };
 
+  // TODO: Переделать на нормальный редирект без захардкоженных url-ов, чтобы на проде тоже работало
   const handleGoogleLogin = () => {
-    navigate(AppRoute.Root);
+    window.location.replace(BACKEND_URL + ApiRoute.GoogleLogin + '?returnUrl=' + APP_URL)
   };
+
+  if(authStatus == AuthorizationStatus.Auth) {
+    return <Navigate to={AppRoute.Root} /> 
+  }
 
   return (
     <div className="login-container">

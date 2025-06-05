@@ -1,8 +1,8 @@
 using System.Security.Claims;
 using EasyBeady.Api.Database.Auth.Models;
+using EasyBeady.Api.DataContracts.UserContracts;
 using Google.Apis.Auth.AspNetCore3;
 using Microsoft.AspNetCore.Authentication;
-using Microsoft.AspNetCore.Authentication.Cookies;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Mvc;
 
@@ -11,7 +11,7 @@ namespace EasyBeady.Api.Controllers;
 [Route("api/account")]
 public class AccountController(SignInManager<AppUser> signInManager, UserManager<AppUser> userManager) : ControllerBase
 {
-    [HttpGet("googleLogin/")]
+    [HttpGet("googleLogin")]
     public IActionResult GoogleLogin(string returnUrl = "/swagger/index.html")
     {
         return new ChallengeResult(GoogleOpenIdConnectDefaults.AuthenticationScheme, new AuthenticationProperties
@@ -21,7 +21,7 @@ public class AccountController(SignInManager<AppUser> signInManager, UserManager
         });
     }
 
-    [HttpGet("login-callback/")]
+    [HttpGet("login-callback")]
     public async Task<ActionResult> GoogleLoginCallback(string returnUrl)
     {
         // Сейчас при авторизаци создается два cookie - один от гугла, второй - стандартный Application.
@@ -42,7 +42,7 @@ public class AccountController(SignInManager<AppUser> signInManager, UserManager
         if (existingUser != null)
         {
             await signInManager.SignInAsync(existingUser, isPersistent: true);
-            return LocalRedirect(returnUrl);
+            return Redirect(returnUrl);
         }
 
         var user = new AppUser
@@ -61,5 +61,29 @@ public class AccountController(SignInManager<AppUser> signInManager, UserManager
         await signInManager.SignInAsync(user, true, "Application");
 
         return LocalRedirect(returnUrl);
+    }
+
+    [HttpPost("logout")]
+    public async Task<IActionResult> Logout()
+    {
+        //TODO: Научиться удалять cookie при выходе из аккаунта
+        await signInManager.SignOutAsync();
+        return Ok();
+    }
+
+    [HttpGet("info")]
+    public async Task<IActionResult> GetUserInfo()
+    {
+        if(!User.Identity.IsAuthenticated)
+            return Unauthorized();
+        var user = await userManager.GetUserAsync(User);
+
+        var userInfo =  new UserInfo
+        {
+            Username = user.UserName,
+            AvatarUrl = User.FindFirstValue("picture")
+        };
+
+        return Ok(userInfo);
     }
 }
