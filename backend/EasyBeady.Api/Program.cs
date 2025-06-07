@@ -1,9 +1,12 @@
 using System.Text.Json.Serialization;
-using EasyBeady.Api.Database.Auth;
-using EasyBeady.Api.Database.Auth.Models;
-using EasyBeady.Api.Database.Domain;
 using EasyBeady.Api.Services;
+using EasyBeady.Database.Contexts;
+using EasyBeady.Database.Entities.Auth;
+using EasyBeady.LocalDb;
+using EasyBeady.MySql.Migrations;
+using EasyBeady.MySql.Migrations.Credentials;
 using Microsoft.AspNetCore.Authentication.Cookies;
+using Microsoft.Data.Sqlite;
 using Microsoft.EntityFrameworkCore;
 
 var builder = WebApplication.CreateBuilder(args);
@@ -29,17 +32,35 @@ builder.Services.AddAuthentication(options =>
     });
 builder.Services.AddAuthorization();
 
-var configuration = builder.Configuration;
-builder.Services.AddDbContext<SchemasDbContext>(options => options.UseMySQL(configuration.GetConnectionString("SchemasConnection")));
-builder.Services.AddDbContext<UsersDbContext>(options => options.UseMySQL(configuration.GetConnectionString("UsersConnection")));
 
-builder.Services.AddControllers()
-    .AddJsonOptions(options => options.JsonSerializerOptions.Converters.Add(new JsonStringEnumConverter()));
+if (builder.Environment.IsDevelopment())
+{
+    builder.Services
+        .AddSingleton<SqliteConnection<UsersDbContext>>()
+        .AddSingleton<SqliteConnection<SchemasDbContext>>()
+        .AddSingleton<IDbContextFactory<UsersDbContext>, LocalDbContextFactory<UsersDbContext>>()
+        .AddSingleton<IDbContextFactory<SchemasDbContext>, LocalDbContextFactory<SchemasDbContext>>();
+}
+else
+{
+    builder.Services.Configure<MySqlDbCredentials<UsersDbContext>>(builder.Configuration.GetSection(nameof(UsersDbContext)));
+    builder.Services.Configure<MySqlDbCredentials<SchemasDbContext>>(builder.Configuration.GetSection(nameof(SchemasDbContext)));
+    builder.Services
+        .AddSingleton<IDbContextFactory<UsersDbContext>, MySqlDbContextFactory<UsersDbContext>>()
+        .AddSingleton<IDbContextFactory<SchemasDbContext>, MySqlDbContextFactory<SchemasDbContext>>();
+}
+
+builder.Services.AddScoped<UsersDbContext>(provider => provider.GetService<IDbContextFactory<UsersDbContext>>().CreateDbContext());
+builder.Services.AddScoped<SchemasDbContext>(provider => provider.GetService<IDbContextFactory<SchemasDbContext>>().CreateDbContext());
+
+
 
 builder.Services
     .AddIdentityApiEndpoints<AppUser>()
     .AddEntityFrameworkStores<UsersDbContext>();
 
+builder.Services.AddControllers()
+    .AddJsonOptions(options => options.JsonSerializerOptions.Converters.Add(new JsonStringEnumConverter()));
 builder.Services.AddEndpointsApiExplorer();
 builder.Services.AddSwaggerGen();
 builder.Services.AddServiceScope();

@@ -1,8 +1,7 @@
-using EasyBeady.Api.Database.Auth.Models;
 using EasyBeady.Api.DataContracts.SchemaContracts;
 using EasyBeady.Api.Services.SchemaRepository;
 using EasyBeady.Api.Utils;
-using Google.Apis.Auth.AspNetCore3;
+using EasyBeady.Database.Entities.Auth;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Mvc;

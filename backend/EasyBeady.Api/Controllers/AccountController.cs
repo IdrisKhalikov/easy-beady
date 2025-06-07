@@ -1,6 +1,6 @@
 using System.Security.Claims;
-using EasyBeady.Api.Database.Auth.Models;
 using EasyBeady.Api.DataContracts.UserContracts;
+using EasyBeady.Database.Entities.Auth;
 using Google.Apis.Auth.AspNetCore3;
 using Microsoft.AspNetCore.Authentication;
 using Microsoft.AspNetCore.Identity;
