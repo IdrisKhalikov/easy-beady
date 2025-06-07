@@ -8,6 +8,7 @@ export enum AppRoute {
 }
 
 export enum ApiRoute {
+  Register = '/account/register',
   GoogleLogin = '/account/googleLogin',
   Login = '/account/login',
   AuthInfo = '/account/info',

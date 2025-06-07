@@ -1,7 +1,7 @@
 import { createSlice } from '@reduxjs/toolkit';
 import { NameSpace } from '../../../const';
 import { UserData } from '../../../types/state';
-import { checkAuthAction, loginAction, logoutAction } from '../../api-actions/user-api-actions';
+import { checkAuthAction, loginAction, logoutAction, registerAction } from '../../api-actions/user-api-actions';
 import { AuthorizationStatus } from 'types/user';
 
 const initialState: UserData = {
@@ -33,6 +33,9 @@ export const userData = createSlice({
     builder.addCase(checkAuthAction.rejected, (state) => {
       state.authorizationStatus = AuthorizationStatus.NoAuth;
       state.isAuthBeingChecked = false;
+    });
+    builder.addCase(registerAction.pending, (state) => {
+      state.isAuthBeingChecked = true;
     });
     builder.addCase(loginAction.pending, (state) => {
       state.isAuthBeingChecked = true;

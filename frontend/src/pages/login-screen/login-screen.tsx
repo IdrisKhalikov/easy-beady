@@ -10,8 +10,12 @@ import { BACKEND_URL } from 'services/api';
 import { useAppSelector } from 'hooks/use-app-selector';
 import { getAuthoriztionStatus } from 'store/slices/user-data/selectors';
 import { AuthorizationStatus } from 'types/user';
+import { useAppDispatch } from 'hooks/use-app-dispatch';
+import { loginAction, registerAction } from 'store/api-actions/user-api-actions';
+import { Credentials } from 'types/credentials';
 
 export default function LoginPage() {
+  const dispatch = useAppDispatch();
   const authStatus = useAppSelector(getAuthoriztionStatus);
 
   const [showPassword, setShowPassword] = useState(false);
@@ -32,7 +36,7 @@ export default function LoginPage() {
     return hasLetter && hasNumber;
   };
 
-  const handleLogin = () => {
+  const handleRegister = () => {
     let isValid = true;
     
     // Валидация email
@@ -57,9 +61,15 @@ export default function LoginPage() {
     }
 
     if (isValid) {
-      navigate(AppRoute.Root);
+      const credentials: Credentials = { email, password };
+      dispatch(registerAction(credentials));
     }
   };
+
+  const handleLogin = () => {
+    const credentials: Credentials = { email, password };
+    dispatch(loginAction(credentials));
+  }
 
   // TODO: Переделать на нормальный редирект без захардкоженных url-ов, чтобы на проде тоже работало
   const handleGoogleLogin = () => {
@@ -127,6 +137,12 @@ export default function LoginPage() {
         </div>
         
         <div className='enter-buttons'>
+          <Button 
+            variant={'for-loggin-form'} 
+            text={'Зарегистрироваться'}
+            onClick={handleRegister}
+            disabled={!email || !password}
+          />
           <Button 
             variant={'for-loggin-form'} 
             text={'Войти'}
