@@ -6,6 +6,7 @@ using EasyBeady.Api.Utils;
 
 namespace EasyBeady.Api.Services.SchemaRepository;
 
+// Методы работы с бд синхронные. Насколько это ок? TODO: Покопать
 public class DbSchemaRepository : ISchemaRepository
 {
     private readonly SchemasDbContext _context;
@@ -13,6 +14,12 @@ public class DbSchemaRepository : ISchemaRepository
     public DbSchemaRepository(SchemasDbContext context)
     {
         _context = context;
+    }
+
+    public List<Schema> GetSchemas(Guid userId)
+    {
+        var schemas = _context.Schemas.Where(s => s.UserId == userId);
+        return schemas.AsEnumerable().Select(ConvertModelToSchema).ToList();
     }
 
     public Schema? GetSchema(Guid schemaId, Guid userId)
@@ -39,6 +46,16 @@ public class DbSchemaRepository : ISchemaRepository
         schema.Info.SchemaId = schemaId;
         var newModel = ConvertSchemaToModel(schema);
         _context.Entry(schemaModel).CurrentValues.SetValues(newModel);
+        _context.SaveChanges();
+        return true;
+    }
+
+    public bool DeleteSchema(Guid schemaId, Guid userId)
+    {
+        var schemaModel = _context.Schemas.FirstOrDefault(s => s.SchemaId == schemaId && s.UserId == userId);
+        if(schemaModel == null)
+            return false;
+        _context.Schemas.Remove(schemaModel);
         _context.SaveChanges();
         return true;
     }

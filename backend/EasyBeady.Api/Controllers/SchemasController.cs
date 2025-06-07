@@ -12,13 +12,13 @@ namespace EasyBeady.Api.Controllers;
 
 [Route("api/schemas")]
 [Authorize]
-public class SchemaController : ControllerBase
+public class SchemasController : ControllerBase
 {
     private readonly ISystemClock systemClock;
     private readonly ISchemaRepository schemaRepository;
     private readonly UserManager<AppUser> userManager;
 
-    public SchemaController(
+    public SchemasController(
         ISystemClock systemClock,
         ISchemaRepository schemaRepository,
         UserManager<AppUser> userManager)
@@ -26,6 +26,14 @@ public class SchemaController : ControllerBase
         this.systemClock = systemClock;
         this.schemaRepository = schemaRepository;
         this.userManager = userManager;
+    }
+
+    [HttpGet]
+    public async Task<ActionResult<IEnumerable<SchemaInfo>>> GetSchemas()
+    {
+        var userId = (await userManager.GetUserAsync(HttpContext.User)).Id;
+        var schemas = schemaRepository.GetSchemas(userId);
+        return schemas.Select(schema => schema.Info).ToList();
     }
 
     [HttpGet]
@@ -42,32 +50,41 @@ public class SchemaController : ControllerBase
     }
 
     [HttpPut]
-    public async Task<ActionResult<Guid>> PutSchema([FromBody] SchemaUpdate? schemaUpdate)
+    public async Task<ActionResult<Guid>> PutSchema([FromBody] SchemaCreate? schemaCreate)
     {
         var user = (await userManager.GetUserAsync(User));
         var userId = user.Id;
-        if(schemaUpdate == null)
+        if(schemaCreate == null)
             return BadRequest("Schema object is null");
-        var isNullText = SchemaUpdateIsNullValidation(schemaUpdate);
-        if (isNullText != "OK")
-            return BadRequest(isNullText);
-        var validationText = SchemaUpdateValidation(schemaUpdate);
-        if (validationText != "OK")
-            return BadRequest(validationText);
+        //var isNullText = SchemaUpdateIsNullValidation(schemaUpdate);
+        //if (isNullText != "OK")
+            //return BadRequest(isNullText);
+        //var validationText = SchemaUpdateValidation(schemaUpdate);
+        //if (validationText != "OK")
+            //return BadRequest(validationText);
 
         var nowStr = systemClock.UtcNow.ToSortableDateString();
+
+        var schemaArr = new int[schemaCreate.Height][];
+        for (var i = 0; i < schemaCreate.Height; i++)
+        {
+            schemaArr[i] = new int[schemaCreate.Width];
+            schemaArr[i].AsSpan().Fill(0xFFFFFF);
+        }
+
         var schema = new Schema
         {
             Info = new SchemaInfo
             {
-                Name = schemaUpdate.Name,
+                Name = schemaCreate.Name,
+                SchemaType = schemaCreate.SchemaType,
                 UserId = userId,
                 CreatedDate = nowStr,
                 LastUpdateDate = nowStr,
-                Width = schemaUpdate.Data.Max(row => row.Length),
-                Height = schemaUpdate.Data.Length
+                Width = schemaCreate.Width,
+                Height = schemaCreate.Height
             },
-            Data = schemaUpdate.Data
+            Data = schemaArr
         };
 
         var schemaId = schemaRepository.SaveSchema(schema);
@@ -93,6 +110,8 @@ public class SchemaController : ControllerBase
             Info = new SchemaInfo
             {
                 Name = schemaUpdate.Name ?? schema.Info.Name,
+                SchemaId = schema.Info.SchemaId,
+                UserId = schema.Info.UserId,
                 SchemaType = schemaUpdate.SchemaType ?? schema.Info.SchemaType,
                 CreatedDate = schema.Info.CreatedDate,
                 LastUpdateDate = systemClock.UtcNow.ToSortableDateString(),
@@ -105,6 +124,17 @@ public class SchemaController : ControllerBase
 
         var success = schemaRepository.UpdateSchema(schemaId, userId, updatedSchema);
         return success ? Ok(schemaId) : NotFound(schemaId);
+    }
+
+    [HttpDelete]
+    [Route("{schemaId:guid}")]
+    public async Task<IActionResult> DeleteSchema(Guid schemaId)
+    {
+        var userId = (await userManager.GetUserAsync(User)).Id;
+        var deletedSuccessfully = schemaRepository.DeleteSchema(schemaId, userId);
+        if(!deletedSuccessfully)
+            return NotFound("Schema with specified id was not found");
+        return Ok();
     }
 
     //TODO: Вынести валидацию в отдельный Helper-класс

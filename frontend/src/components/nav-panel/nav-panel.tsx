@@ -14,6 +14,7 @@ type NavigationPanelProps = {
   title: string;
   selectedOption: 'edit' | 'weave';
   onOptionChange: (option: 'edit' | 'weave') => void;
+  onSave: () => void;
   onRestart: () => void;
 };
 
@@ -21,6 +22,7 @@ export default function NavigationPanel({
   title,
   selectedOption,
   onOptionChange,
+  onSave,
   onRestart
 }: NavigationPanelProps): JSX.Element {
   const navigate = useNavigate();
@@ -36,6 +38,7 @@ export default function NavigationPanel({
 
   const handleSaveButton = () => {
     console.log('Сохранено');
+    onSave();
     setShowSaveModal(false);
   };
 

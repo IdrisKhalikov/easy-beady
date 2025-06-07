@@ -1,10 +1,16 @@
-import { JSX, useState } from 'react';
+import { JSX, useCallback, useEffect, useState } from 'react';
 import ExitToAppIcon from '@mui/icons-material/ExitToApp';
 import { useNavigate } from 'react-router-dom';
 import './header.css';
 import { AppRoute } from '../../const'; 
+import { useAppDispatch } from 'hooks/use-app-dispatch';
+import { logoutAction } from 'store/api-actions/user-api-actions';
+import { useAppSelector } from 'hooks/use-app-selector';
+import { getAuthInfo } from 'store/slices/user-data/selectors';
 
 export default function Header(): JSX.Element {
+  const user = useAppSelector(getAuthInfo);
+  const dispatch = useAppDispatch();
   const [isMenuOpen, setIsMenuOpen] = useState(false);
   const navigate = useNavigate();
 
@@ -12,10 +18,11 @@ export default function Header(): JSX.Element {
     setIsMenuOpen(!isMenuOpen);
   };
 
-  const handleLogout = () => {
+  const handleLogout = useCallback(() => {
+    dispatch(logoutAction());
     navigate(AppRoute.Login); 
     setIsMenuOpen(false); 
-  };
+  }, [dispatch]);
 
   return (
     <header className="header-container">
@@ -25,7 +32,9 @@ export default function Header(): JSX.Element {
 
       <div className="account-container">
         <button className="avatar-button" onClick={toggleMenu}>
-          <div className="avatar"></div>
+          <div className="avatar">
+            <img src={user?.avatarUrl} />
+          </div>
         </button>
 
         {isMenuOpen && (

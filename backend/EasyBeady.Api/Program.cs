@@ -8,7 +8,6 @@ using Microsoft.EntityFrameworkCore;
 
 var builder = WebApplication.CreateBuilder(args);
 
-builder.Services.AddAuthorization();
 builder.Services.AddAuthentication(options =>
     {
         options.DefaultScheme = CookieAuthenticationDefaults.AuthenticationScheme;
@@ -28,7 +27,7 @@ builder.Services.AddAuthentication(options =>
         options.ClientId = builder.Configuration["GoogleAuthData:ClientId"];
         options.ClientSecret = builder.Configuration["GoogleAuthData:ClientSecret"];
     });
-
+builder.Services.AddAuthorization();
 
 var configuration = builder.Configuration;
 builder.Services.AddDbContext<SchemasDbContext>(options => options.UseMySQL(configuration.GetConnectionString("SchemasConnection")));
@@ -51,11 +50,12 @@ if (app.Environment.IsDevelopment())
 {
     app.UseHsts();
     app.UseSwagger();
-    app.UseSwaggerUI();
+    app.UseSwaggerUI(options => options.SwaggerEndpoint("https://localhost:7291/swagger/v1/swagger.json", "v1"));
 }
 
 app.UseHttpsRedirection();
 app.UseRouting();
+app.UseCors(options => options.AllowAnyMethod().AllowAnyHeader().AllowCredentials().WithOrigins("http://localhost:3000"));
 app.UseAuthentication();
 app.UseAuthorization();
 app.MapControllers();
@@ -63,4 +63,4 @@ app.MapControllers();
 app.MapGroup("/api/account").MapIdentityApi<AppUser>();
 
 app.UseHttpsRedirection();
-app.Run();
+app.Run("https://localhost:7291");

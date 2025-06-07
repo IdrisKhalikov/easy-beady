@@ -12,6 +12,9 @@ import CloseIcon from '@mui/icons-material/Close';
 import KeyboardArrowUpIcon from '@mui/icons-material/KeyboardArrowUp';
 import KeyboardArrowDownIcon from '@mui/icons-material/KeyboardArrowDown';
 import './create-form-modal.css';
+import { useAppDispatch } from 'hooks/use-app-dispatch';
+import { createSchemaAction } from 'store/api-actions/schema-api-actions';
+import { SchemaCreate } from 'types/schema-create';
 
 interface CreateFormModalProps {
   onClose: () => void;
@@ -19,6 +22,7 @@ interface CreateFormModalProps {
 
 export default function CreateFormModal({ onClose }: CreateFormModalProps) {
   const navigate = useNavigate();
+  const dispatch = useAppDispatch();
   const [width, setWidth] = useState(20);
   const [height, setHeight] = useState(20);
   const [schemeName, setSchemeName] = useState('');
@@ -50,14 +54,24 @@ export default function CreateFormModal({ onClose }: CreateFormModalProps) {
 
     if (hasErrors) return;
 
-    navigate('/edit', {
-      state: {
-        title: schemeName,
-        width,
-        height,
-        type: schemeType,
-      }
-    });
+    const schemaCreate : SchemaCreate = {
+      name: schemeName,
+      schemaType: schemeType,
+      width: width,
+      height: height
+    }
+
+    dispatch(createSchemaAction(schemaCreate));
+
+    //TODO: Пока закомментировал, т.к. у на схема создается асинхронно и непонятно, как на нее переключиться
+    // navigate('/edit', {
+    //   state: {
+    //     title: schemeName,
+    //     width,
+    //     height,
+    //     type: schemeType,
+    //   }
+    // });
 
     onClose();
   };
