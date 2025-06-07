@@ -1,7 +1,7 @@
-using EasyBeady.Api.Database.Domain.Models;
+using EasyBeady.Database.Entities.Domain;
 using Microsoft.EntityFrameworkCore;
 
-namespace EasyBeady.Api.Database.Domain;
+namespace EasyBeady.Database.Contexts;
 
 public class SchemasDbContext : DbContext
 {

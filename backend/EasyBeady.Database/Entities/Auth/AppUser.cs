@@ -1,6 +1,6 @@
 using Microsoft.AspNetCore.Identity;
 
-namespace EasyBeady.Api.Database.Auth.Models;
+namespace EasyBeady.Database.Entities.Auth;
 
 public class AppUser : IdentityUser<Guid>
 {

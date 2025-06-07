@@ -1,6 +1,6 @@
 using System.ComponentModel.DataAnnotations;
 
-namespace EasyBeady.Api.Database.Domain.Models;
+namespace EasyBeady.Database.Entities.Domain;
 
 public class SchemaModel
 {

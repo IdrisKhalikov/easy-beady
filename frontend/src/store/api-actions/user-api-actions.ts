@@ -6,6 +6,7 @@ import { redirectToRoute } from '../action';
 import { fetchSchemasAction } from './schemas-api-actions';
 import { AuthCheckResult, User } from '../../types/user';
 import { StatusCodes } from 'http-status-codes';
+import { Credentials } from 'types/credentials';
 
 export const checkAuthAction = createAsyncThunk<AuthCheckResult, undefined, {
   dispatch: AppDispatch;
@@ -27,15 +28,28 @@ export const checkAuthAction = createAsyncThunk<AuthCheckResult, undefined, {
   },
 );
 
-export const loginAction = createAsyncThunk<User, undefined, {
+export const registerAction = createAsyncThunk<void, Credentials, {
+  dispatch: AppDispatch;
+  state: State;
+  extra: AxiosInstance;
+}>(
+  'user/register',
+  async (credentials, { extra: api }) => {
+    await api.post<User>(ApiRoute.Register, credentials);
+  },
+);
+
+export const loginAction = createAsyncThunk<User, Credentials, {
   dispatch: AppDispatch;
   state: State;
   extra: AxiosInstance;
 }>(
   'user/login',
-  async (_arg, { dispatch, extra: api }) => {
-    const { data } = await api.post<User>(ApiRoute.Login);
-    dispatch(redirectToRoute(AppRoute.Root));
+  async (credentials, { extra: api }) => {
+    const { data } = await api.post<User>(ApiRoute.Login, credentials, { params: {
+      useCookies: true,
+      useSessionCookies: true
+    }});
     return data;
   },
 );

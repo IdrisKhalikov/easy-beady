@@ -1,8 +1,8 @@
-using EasyBeady.Api.Database.Domain;
-using EasyBeady.Api.Database.Domain.Models;
 using EasyBeady.Api.DataContracts.SchemaContracts;
 using EasyBeady.Api.Services.Helpers;
 using EasyBeady.Api.Utils;
+using EasyBeady.Database.Contexts;
+using EasyBeady.Database.Entities.Domain;
 
 namespace EasyBeady.Api.Services.SchemaRepository;
 
