@@ -1,21 +1,27 @@
+using System.ComponentModel.DataAnnotations;
+using System.Drawing;
 using System.Runtime.Serialization;
-using System.Text.Json.Serialization;
+using Newtonsoft.Json;
 
 namespace EasyBeady.Api.DataContracts.SchemaContracts;
 
 [DataContract(Name = "schemaUpdate", Namespace = "")]
 public class SchemaUpdate
 {
+    [StringLength(255)]
     [DataMember(Name = "name")]
     public string? Name { get; set; }
 
-    [JsonConverter(typeof(JsonStringEnumConverter))]
-    [DataMember(Name="schemaType")]
-    public SchemaType? SchemaType { get; set; }
-
     [DataMember(Name = "linesCompleted")]
-    public int? LinesCompleted { get; set; }
+    public bool[]? LinesCompleted { get; set; }
 
+    [DataMember(Name = "width")]
+    public int? Width { get; set; }
+    
+    [DataMember(Name = "height")]
+    public int? Height { get; set; }
+
+    [JsonProperty(ItemConverterType = typeof(ColorConverter))]
     [DataMember(Name = "data")]
-    public int[][]? Data { get; set; }
+    public Color[]? Data { get; set; }
 }

@@ -1,5 +1,5 @@
 using EasyBeady.Api.DataContracts.SchemaContracts;
-using EasyBeady.Api.Services.Helpers;
+using EasyBeady.Api.Helpers;
 using EasyBeady.Api.Utils;
 using EasyBeady.Database.Contexts;
 using EasyBeady.Database.Entities.Domain;
@@ -71,11 +71,12 @@ public class DbSchemaRepository : ISchemaRepository
                 SchemaType = Enum.Parse<SchemaType>(model.Type),
                 Width = model.Width,
                 Height = model.Height,
-                LinesCompleted = model.LinesCompleted,
+                LinesCompleted = BinaryUtils.ConvertBinaryToBoolArray(model.LinesCompleted, model.Width),
                 CreatedDate = model.CreationDate.ToSortableDateString(),
-                LastUpdateDate = model.LastUpdateDate.ToSortableDateString()
+                LastUpdateDate = model.LastUpdateDate.ToSortableDateString(),
+                Preview = model.SchemaPreview
             },
-            Data = SchemaConverter.FromBinary(CompressionUtils.Decompress(model.Schema))
+            Data = SchemaConverter.FromBinary(BinaryUtils.Decompress(model.Schema))
         };
 
     private static SchemaModel ConvertSchemaToModel(Schema schema)
@@ -87,9 +88,10 @@ public class DbSchemaRepository : ISchemaRepository
             Type = schema.Info.SchemaType.ToString(),
             Width = schema.Info.Width,
             Height = schema.Info.Height,
-            LinesCompleted = schema.Info.LinesCompleted,
+            LinesCompleted = BinaryUtils.ConvertBoolArrayToBinary(schema.Info.LinesCompleted),
             CreationDate = schema.Info.CreatedDate.FromSortableDateTime(),
             LastUpdateDate = schema.Info.LastUpdateDate.FromSortableDateTime(),
-            Schema = CompressionUtils.Compress(SchemaConverter.ToBinary(schema.Data))
+            SchemaPreview = schema.Info.Preview,
+            Schema = BinaryUtils.Compress(SchemaConverter.ToBinary(schema.Data))
         };
 }

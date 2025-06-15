@@ -9,15 +9,33 @@ public class MySqlDbContextFactory<T> : IDbContextFactory<T>
 {
     private readonly MySqlDbCredentials<T> credentials;
 
-    public MySqlDbContextFactory(IOptions<MySqlDbCredentials<T>> credentials)
+    public MySqlDbContextFactory(IOptions<MySqlDbCredentials<T>> credentials) : this(credentials.Value)
     {
-        this.credentials = credentials.Value;
+    }
+
+    public MySqlDbContextFactory(MySqlDbCredentials<T> credentials)
+    {
+        this.credentials = credentials;
+    }
+
+    public T CreateDbContextForMigrations()
+    {
+        if (string.IsNullOrEmpty(credentials.ConnectionString))
+        {
+            var options = new DbContextOptionsBuilder<T>()
+                .UseMySQL(options => options.MigrationsAssembly(typeof(MySqlDbContextFactory<>).Assembly.GetName().Name))
+                .Options;
+
+            return (T)Activator.CreateInstance(typeof(T), options);
+        }
+
+        return CreateDbContext();
     }
 
     public T CreateDbContext()
     {
         var options = new DbContextOptionsBuilder<T>()
-            .UseMySQL(credentials.ConnectionString)
+            .UseMySQL(credentials.ConnectionString, options => options.MigrationsAssembly(typeof(MySqlDbContextFactory<>).Assembly.GetName().Name))
             .Options;
         return (T) Activator.CreateInstance(typeof(T), options);
     }

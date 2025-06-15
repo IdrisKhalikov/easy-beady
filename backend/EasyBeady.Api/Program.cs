@@ -1,5 +1,6 @@
 using System.Text.Json.Serialization;
 using EasyBeady.Api.Services;
+using EasyBeady.Api.Utils;
 using EasyBeady.Database.Contexts;
 using EasyBeady.Database.Entities.Auth;
 using EasyBeady.LocalDb;
@@ -60,7 +61,11 @@ builder.Services
     .AddEntityFrameworkStores<UsersDbContext>();
 
 builder.Services.AddControllers()
-    .AddJsonOptions(options => options.JsonSerializerOptions.Converters.Add(new JsonStringEnumConverter()));
+    .AddJsonOptions(options =>
+    {
+        options.JsonSerializerOptions.Converters.Add(new JsonStringEnumConverter());
+        options.JsonSerializerOptions.Converters.Add(new ColorJsonConverter());
+    });
 builder.Services.AddEndpointsApiExplorer();
 builder.Services.AddSwaggerGen();
 builder.Services.AddServiceScope();

@@ -1,9 +1,9 @@
-import { CellColor } from './schema';
-import { SchemaType } from './schema-preview';
+import { SchemaData } from './schema';
 
 export type SchemaUpdate = {
     name: string,
-    schemaType: SchemaType,
-    linesCompleted: number,
-    data: CellColor[][]
+    width: number,
+    height: number,
+    linesCompleted: boolean[],
+    data: SchemaData
 }

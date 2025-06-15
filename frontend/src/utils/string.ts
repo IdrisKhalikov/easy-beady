@@ -1,10 +1,12 @@
-import { CellColor } from 'types/schema'
+export function toCellColor(colorStr: string): number {
+    if(colorStr == null) {
+        return 0xFFFFFF;
+    }
 
-export function toCellColor(colorStr: string): CellColor {
     return parseInt(colorStr.slice(1), 16);
 }
 
-export function colorToHexStr(color: CellColor): string {
+export function colorToHexStr(color: number): string {
     if(!color) {
         return "#FFFFFF";
     }

@@ -6,7 +6,8 @@ export type SchemaPreview = {
     lastUpdateDate: string,
     width: number,
     height: number,
-    linesCompleted: number
+    preview: string,
+    linesCompleted: boolean[]
 }
 
 export type SchemaType = 'square' | 'peyote';

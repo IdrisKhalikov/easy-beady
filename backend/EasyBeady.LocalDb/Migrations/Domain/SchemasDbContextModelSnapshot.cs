@@ -32,8 +32,9 @@ namespace EasyBeady.Database.Migrations
                     b.Property<DateTime>("LastUpdateDate")
                         .HasColumnType("TEXT");
 
-                    b.Property<int>("LinesCompleted")
-                        .HasColumnType("INTEGER");
+                    b.Property<string>("LinesCompleted")
+                        .IsRequired()
+                        .HasColumnType("TEXT");
 
                     b.Property<string>("Name")
                         .IsRequired()
@@ -42,6 +43,10 @@ namespace EasyBeady.Database.Migrations
                     b.Property<byte[]>("Schema")
                         .IsRequired()
                         .HasColumnType("BLOB");
+
+                    b.Property<string>("SchemaPreview")
+                        .IsRequired()
+                        .HasColumnType("TEXT");
 
                     b.Property<string>("Type")
                         .IsRequired()

@@ -24,7 +24,7 @@ export default function SchemeCard({ schema, onDelete }: SchemeCardProps) {
     onDelete();
   }, [onDelete]);
 
-  const progress = schema.linesCompleted * 100 / schema.width;
+  const progress = schema.linesCompleted.reduce((acc, c) => (c ? acc + 1 : acc), 0) * 100 / schema.width;
   const status = progress == 100 ? CompletionStatus.Done : CompletionStatus.InProgress;
 
   return (
@@ -44,7 +44,8 @@ export default function SchemeCard({ schema, onDelete }: SchemeCardProps) {
 
       <div className="card__image-container">
         <img
-          src={'https://detisun.ru/foto/4341/pletenie_iz_bisera_dlia_detei_7_let_poetapno_dlia_nachinaiushchikh_4.webp'}
+          src={`data:image/png;base64,${schema.preview}`}
+          
           alt="Scheme Preview"
           className="card__image"
         />

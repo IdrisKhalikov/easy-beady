@@ -74,9 +74,12 @@ public class AccountController(SignInManager<AppUser> signInManager, UserManager
     [HttpGet("info")]
     public async Task<IActionResult> GetUserInfo()
     {
-        if(!User.Identity.IsAuthenticated)
+        if(!(User.Identity?.IsAuthenticated ?? false))
             return Unauthorized();
         var user = await userManager.GetUserAsync(User);
+
+        if(user == null)
+            return Unauthorized();
 
         var userInfo =  new UserInfo
         {

@@ -1,8 +1,9 @@
+using System.Collections;
 using System.IO.Compression;
 
 namespace EasyBeady.Api.Utils;
 
-public static class CompressionUtils
+public static class BinaryUtils
 {
     public static byte[] Compress(byte[] data)
     {
@@ -20,5 +21,19 @@ public static class CompressionUtils
         using var resultStream = new MemoryStream();
         decompressionStream.CopyTo(resultStream);
         return resultStream.ToArray();
+    }
+
+    public static byte[] ConvertBoolArrayToBinary(bool[] arr)
+    {
+        var result = new byte[arr.Length / 8 + (arr.Length % 8 != 0 ? 1 : 0)];
+        new BitArray(arr).CopyTo(result, 0);
+        return result;
+    }
+
+    public static bool[] ConvertBinaryToBoolArray(byte[] arr, int length)
+    {
+        var result = new bool[arr.Length * 8];
+        new BitArray(arr).CopyTo(result, 0);
+        return result[..length];
     }
 }
