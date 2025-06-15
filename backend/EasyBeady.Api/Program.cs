@@ -12,7 +12,7 @@ using Microsoft.EntityFrameworkCore;
 
 var builder = WebApplication.CreateBuilder(args);
 
-builder.Services.AddAuthentication(options =>
+var authBuilder = builder.Services.AddAuthentication(options =>
     {
         options.DefaultScheme = CookieAuthenticationDefaults.AuthenticationScheme;
         options.DefaultSignInScheme = "Google";
@@ -22,15 +22,21 @@ builder.Services.AddAuthentication(options =>
         options.Cookie.HttpOnly = false;
         options.Cookie.SecurePolicy = CookieSecurePolicy.Always;
         options.Cookie.SameSite = SameSiteMode.Strict;
-    })
-    .AddCookie("Google")
-    .AddGoogleOpenIdConnect(options =>
-    {
-        options.SignInScheme = "Google";
-        options.CallbackPath = "/api/account/login-callback/";
-        options.ClientId = builder.Configuration["GoogleAuthData:ClientId"];
-        options.ClientSecret = builder.Configuration["GoogleAuthData:ClientSecret"];
     });
+
+if (builder.Configuration.GetValue<bool>("UseGoogleAuth"))
+{
+    authBuilder
+        .AddCookie("Google")
+        .AddGoogleOpenIdConnect(options =>
+        {
+            options.SignInScheme = "Google";
+            options.CallbackPath = "/api/account/login-callback/";
+            options.ClientId = builder.Configuration["GoogleAuthData:ClientId"];
+            options.ClientSecret = builder.Configuration["GoogleAuthData:ClientSecret"];
+        });
+}
+    
 builder.Services.AddAuthorization();
 
 
