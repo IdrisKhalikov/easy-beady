@@ -1,3 +1,4 @@
+using System.Drawing;
 using System.Runtime.Serialization;
 
 namespace EasyBeady.Api.DataContracts.SchemaContracts;
@@ -9,5 +10,5 @@ public class Schema
     public SchemaInfo Info { get; set; }
 
     [DataMember(Name = "data")]
-    public int[][] Data { get; set; }
+    public Color[] Data { get; set; }
 }

@@ -26,7 +26,10 @@ public class SchemaInfo
     public int Height { get; set; }
 
     [DataMember(Name = "linesCompleted")]
-    public int LinesCompleted { get; set; }
+    public bool[]? LinesCompleted { get; set; }
+
+    [DataMember(Name = "preview")]
+    public string Preview { get; set; }
 
     [DataMember(Name = "creationDate")]
     public string CreatedDate { get; set; }

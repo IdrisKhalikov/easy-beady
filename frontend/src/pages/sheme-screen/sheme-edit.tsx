@@ -1,4 +1,4 @@
-import React, { JSX, useState, useEffect, useRef, useMemo } from 'react';
+import React, { JSX, useState, useEffect, useRef, useMemo, useCallback } from 'react';
 import { Navigate, useParams } from 'react-router-dom';
 import GridField, { Cell } from '../../components/grid/grid-field';
 import Header from '../../components/header/header';
@@ -58,7 +58,7 @@ type ShemeEditScreenProps = {
 
 function ShemeEditScreen({schema}: ShemeEditScreenProps): JSX.Element {
   const { name, schemaType, width, height } = schema.info;
-  const initialGridState = useMemo(() => gridFromApiFormat(schema.data, width, height), [schema]);
+  const initialGridState = useMemo(() => gridFromApiFormat(schema.data), [schema]);
   const dispatch = useAppDispatch();
 
   const [selectedOption, setSelectedOption] = useState<'edit' | 'weave'>('edit');
@@ -71,7 +71,7 @@ function ShemeEditScreen({schema}: ShemeEditScreenProps): JSX.Element {
   const [fillActive, setFillActive] = useState(false);
   const [zoomLevel, setZoomLevel] = useState(100);
   const [schemeType, setSchemeType] = useState<SchemaType>(schemaType);
-  const [markedColumns, setMarkedColumns] = useState<ColumnState>({});
+  const [markedColumns, setMarkedColumns] = useState<ColumnState>({...schema.info.linesCompleted});
 
   const cellSize = 15;
   const colorPickerRef = useRef<HTMLInputElement>(null);
@@ -92,7 +92,6 @@ function ShemeEditScreen({schema}: ShemeEditScreenProps): JSX.Element {
       });
     }
     setGrid(newGrid);
-    setMarkedColumns({});
   };
 
   const handlePaletteClick = () => {
@@ -180,16 +179,34 @@ function ShemeEditScreen({schema}: ShemeEditScreenProps): JSX.Element {
     setZoomLevel(value);
   };
 
-  const handleSave = () => {
+  const handleSave = useCallback(() => {
+    const linesCompleted = Array(width);
+    for(let i = 0; i< width; i++) {
+      if(markedColumns.hasOwnProperty(i)) {
+        linesCompleted[i] = markedColumns[i];
+      } else {
+        linesCompleted[i] = false;
+      }
+    }
     const schemaUpdate: SchemaUpdate = {
       name,
-      schemaType,
-      linesCompleted: Object.entries(markedColumns).length,
-      data: gridToApiFormat(grid, gridWidth, gridHeight)
+      width,
+      height,
+      linesCompleted: linesCompleted,
+      data: gridToApiFormat(grid)
     }
 
     dispatch(updateSchemaAction({...schemaUpdate, id: schema.info.schemaId} ));
-  };
+  }, [dispatch, markedColumns, schema, grid]);
+
+  useEffect(() => {
+    if(selectedOption == 'weave') {
+      const interval = setInterval(() => {
+        handleSave();
+      }, 15_000);
+      return () => clearInterval(interval);
+    }
+  }, [handleSave]);
 
   return (
     <div className="page-container">

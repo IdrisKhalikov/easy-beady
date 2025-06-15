@@ -39,7 +39,8 @@ export const updateSchemaAction = createAsyncThunk<string, SchemaUpdate & {id: s
 }>(
   'data/updateSchema',
   async (schemaUpdate, { extra: api }) => {
-    const { data } = await api.post<string>(`${ApiRoute.Schemas}/${schemaUpdate.id}`, schemaUpdate);
+    const {id, ...schema} = schemaUpdate
+    const { data } = await api.post<string>(`${ApiRoute.Schemas}/${schemaUpdate.id}`, schema);
     return data;
   },
 );

@@ -1,4 +1,6 @@
+using System.Drawing;
 using EasyBeady.Api.DataContracts.SchemaContracts;
+using EasyBeady.Api.Helpers;
 using EasyBeady.Api.Services.SchemaRepository;
 using EasyBeady.Api.Utils;
 using EasyBeady.Database.Entities.Auth;
@@ -55,21 +57,11 @@ public class SchemasController : ControllerBase
         var userId = user.Id;
         if(schemaCreate == null)
             return BadRequest("Schema object is null");
-        //var isNullText = SchemaUpdateIsNullValidation(schemaUpdate);
-        //if (isNullText != "OK")
-            //return BadRequest(isNullText);
-        //var validationText = SchemaUpdateValidation(schemaUpdate);
-        //if (validationText != "OK")
-            //return BadRequest(validationText);
 
         var nowStr = systemClock.UtcNow.ToSortableDateString();
 
-        var schemaArr = new int[schemaCreate.Height][];
-        for (var i = 0; i < schemaCreate.Height; i++)
-        {
-            schemaArr[i] = new int[schemaCreate.Width];
-            schemaArr[i].AsSpan().Fill(0xFFFFFF);
-        }
+        var schemaArr = new Color[schemaCreate.Width * schemaCreate.Height];
+        schemaArr.AsSpan().Fill(Color.White);
 
         var schema = new Schema
         {
@@ -81,7 +73,9 @@ public class SchemasController : ControllerBase
                 CreatedDate = nowStr,
                 LastUpdateDate = nowStr,
                 Width = schemaCreate.Width,
-                Height = schemaCreate.Height
+                Height = schemaCreate.Height,
+                LinesCompleted = new bool[schemaCreate.Width],
+                Preview = Convert.ToBase64String(SchemaToImageConverter.MakeImage(schemaArr, schemaCreate.Width, schemaCreate.Height, schemaCreate.SchemaType).ToArray()),
             },
             Data = schemaArr
         };
@@ -111,15 +105,24 @@ public class SchemasController : ControllerBase
                 Name = schemaUpdate.Name ?? schema.Info.Name,
                 SchemaId = schema.Info.SchemaId,
                 UserId = schema.Info.UserId,
-                SchemaType = schemaUpdate.SchemaType ?? schema.Info.SchemaType,
+                SchemaType = schema.Info.SchemaType,
                 CreatedDate = schema.Info.CreatedDate,
                 LastUpdateDate = systemClock.UtcNow.ToSortableDateString(),
-                Width = schemaUpdate.Data?.Max(row => row.Length) ?? schema.Info.Width,
-                Height = schemaUpdate.Data?.Length ?? schema.Data.Length,
+                Width = schemaUpdate.Width ?? schema.Info.Width,
+                Height = schemaUpdate.Height ?? schema.Info.Height,
                 LinesCompleted = schemaUpdate.LinesCompleted ?? schema.Info.LinesCompleted
             },
             Data = schemaUpdate.Data ?? schema.Data
         };
+
+        updatedSchema.Info.Preview = Convert.ToBase64String(
+            SchemaToImageConverter.MakeImage(
+                updatedSchema.Data,
+                updatedSchema.Info.Width,
+                updatedSchema.Info.Height,
+                updatedSchema.Info.SchemaType
+            ).ToArray()
+        );
 
         var success = schemaRepository.UpdateSchema(schemaId, userId, updatedSchema);
         return success ? Ok(schemaId) : NotFound(schemaId);
@@ -141,8 +144,6 @@ public class SchemasController : ControllerBase
     {
         if (schemaUpdate.Name is null) 
             return "Name is null";
-        if (schemaUpdate.SchemaType is null)
-            return "Type is null";
         if (schemaUpdate.LinesCompleted is null) 
             return "Number of lines is null";
         if (schemaUpdate.Data is null)
@@ -154,12 +155,10 @@ public class SchemasController : ControllerBase
     {
         if (schemaUpdate.Name is not null && String.IsNullOrWhiteSpace(schemaUpdate.Name)) 
             return "Name is empty";
-        if (schemaUpdate.LinesCompleted is not null && schemaUpdate.LinesCompleted < 0) 
+        if (schemaUpdate.LinesCompleted is not null && schemaUpdate.LinesCompleted.Length != schemaUpdate.Width) 
             return "Number of lines is invalid";
-        if (schemaUpdate.Data is not null && schemaUpdate.Data.Count(x => x.Length > 0) == 0) 
+        if (schemaUpdate.Data is not null && schemaUpdate.Data.Length != schemaUpdate.Width * schemaUpdate.Height) 
             return "Data is empty";
-        if (schemaUpdate.Data is not null && schemaUpdate.Data.Count(x => x.Any(y => y < 0 || y > 16777215)) > 0) 
-            return "Data is incorrect";
         return "OK";
     }
 }

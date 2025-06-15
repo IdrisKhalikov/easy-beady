@@ -5,6 +5,6 @@ export type Schema = {
     data: SchemaData
 }
 
-export type SchemaData = CellColor[][]
+export type SchemaData = CellColor[]
 
 export type CellColor = number

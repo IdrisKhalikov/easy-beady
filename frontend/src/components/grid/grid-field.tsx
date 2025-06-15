@@ -33,11 +33,11 @@ export default function GridField({
   const renderCell = (cell: Cell) => {
     const columnIndex = (cell.id - 1) % gridWidth;
     const isColumnMarked = markedColumns[columnIndex];
-    
+
     return (
       <td
         key={`cell-${cell.id}`}
-        className={`grid-cell ${isColumnMarked ? 'marked-column' : ''}`}
+        className={`grid-cell ${isColumnMarked && mode == 'weave' ? 'marked-column' : ''}`}
         style={{
           backgroundColor: cell.color,
           width: `${cellSize}px`,
@@ -51,7 +51,7 @@ export default function GridField({
             {columnIndex + 1}
           </div>
         )}
-        {isColumnMarked && <div className="column-overlay" />}
+        {isColumnMarked && mode == 'weave' && <div className="column-overlay" />}
       </td>
     );
   };
@@ -80,6 +80,7 @@ export default function GridField({
     );
   };
 
+  console.log(markedColumns);
   const rows = [];
   for (let i = 0; i < gridHeight; i++) {
     rows.push(renderRow(i));

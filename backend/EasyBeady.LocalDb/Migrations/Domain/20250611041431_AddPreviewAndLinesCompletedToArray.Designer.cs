@@ -3,64 +3,63 @@ using System;
 using EasyBeady.Database.Contexts;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Infrastructure;
+using Microsoft.EntityFrameworkCore.Migrations;
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 
 #nullable disable
 
-namespace EasyBeady.Api.Database.Domain.Migrations
+namespace EasyBeady.LocalDb.Migrations.Domain
 {
     [DbContext(typeof(SchemasDbContext))]
-    partial class SchemasDbContextModelSnapshot : ModelSnapshot
+    [Migration("20250611041431_AddPreviewAndLinesCompletedToArray")]
+    partial class AddPreviewAndLinesCompletedToArray
     {
-        protected override void BuildModel(ModelBuilder modelBuilder)
+        /// <inheritdoc />
+        protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
 #pragma warning disable 612, 618
-            modelBuilder
-                .HasAnnotation("ProductVersion", "8.0.14")
-                .HasAnnotation("Relational:MaxIdentifierLength", 64);
+            modelBuilder.HasAnnotation("ProductVersion", "8.0.14");
 
             modelBuilder.Entity("EasyBeady.Database.Entities.Domain.SchemaModel", b =>
                 {
                     b.Property<Guid>("SchemaId")
-                        .HasColumnType("binary(16)");
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("BLOB");
 
                     b.Property<DateTime>("CreationDate")
-                        .HasColumnType("datetime");
+                        .HasColumnType("TEXT");
 
-                    b.Property<short>("Height")
-                        .HasColumnType("smallint");
+                    b.Property<int>("Height")
+                        .HasColumnType("INTEGER");
 
                     b.Property<DateTime>("LastUpdateDate")
-                        .HasColumnType("datetime");
+                        .HasColumnType("TEXT");
 
-                    b.Property<byte[]>("LinesCompleted")
+                    b.Property<string>("LinesCompleted")
                         .IsRequired()
-                        .HasColumnType("tinyblob");
+                        .HasColumnType("TEXT");
 
                     b.Property<string>("Name")
                         .IsRequired()
-                        .HasMaxLength(255)
-                        .HasColumnType("varchar(255)");
+                        .HasColumnType("TEXT");
 
                     b.Property<byte[]>("Schema")
                         .IsRequired()
-                        .HasColumnType("mediumblob");
+                        .HasColumnType("BLOB");
 
                     b.Property<string>("SchemaPreview")
                         .IsRequired()
-                        .HasColumnType("text");
+                        .HasColumnType("TEXT");
 
                     b.Property<string>("Type")
                         .IsRequired()
-                        .HasMaxLength(20)
-                        .HasColumnType("varchar(20)");
+                        .HasColumnType("TEXT");
 
                     b.Property<Guid>("UserId")
-                        .IsRequired()
-                        .HasColumnType("binary(16)");
+                        .HasColumnType("BLOB");
 
-                    b.Property<short>("Width")
-                        .HasColumnType("smallint");
+                    b.Property<int>("Width")
+                        .HasColumnType("INTEGER");
 
                     b.HasKey("SchemaId");
 
