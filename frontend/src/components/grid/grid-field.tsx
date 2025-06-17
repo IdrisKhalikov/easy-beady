@@ -1,7 +1,7 @@
 import { JSX } from 'react';
 import './grid-field.css';
-
-type SchemeType = 'square' | 'peyote';
+import { SchemaType } from 'types/schema-preview';
+import { EditorMode } from 'pages/sheme-screen/editor-mode';
 
 export type Cell = {
   id: number;
@@ -15,8 +15,8 @@ type GridFieldProps = {
   gridHeight: number;
   cellSize: number;
   onCellClick: (cellId: number) => void;
-  schemeType: SchemeType;
-  mode: 'edit' | 'weave';
+  schemeType: SchemaType;
+  mode: EditorMode;
   markedColumns: { [key: number]: boolean };
 };
 
@@ -30,6 +30,7 @@ export default function GridField({
   mode,
   markedColumns
 }: GridFieldProps): JSX.Element {
+  console.log(schemeType);
   const renderCell = (cell: Cell) => {
     const columnIndex = (cell.id - 1) % gridWidth;
     const isColumnMarked = markedColumns[columnIndex];
@@ -37,7 +38,7 @@ export default function GridField({
     return (
       <td
         key={`cell-${cell.id}`}
-        className={`grid-cell ${isColumnMarked && mode == 'weave' ? 'marked-column' : ''}`}
+        className={`grid-cell ${isColumnMarked && mode == EditorMode.Weave ? 'marked-column' : ''}`}
         style={{
           backgroundColor: cell.color,
           width: `${cellSize}px`,
@@ -46,12 +47,12 @@ export default function GridField({
         }}
         onClick={() => onCellClick(cell.id)}
       >
-        {mode === 'weave' && (
+        {mode === EditorMode.Weave && (
           <div className="grid-cell-number">
             {columnIndex + 1}
           </div>
         )}
-        {isColumnMarked && mode == 'weave' && <div className="column-overlay" />}
+        {isColumnMarked && mode == EditorMode.Weave && <div className="column-overlay" />}
       </td>
     );
   };
@@ -59,6 +60,7 @@ export default function GridField({
   const renderRow = (rowIndex: number) => {
     const cells = [];
     const isEvenRow = rowIndex % 2 === 0;
+    console.log(schemeType === SchemaType.Peyote);
     
     for (let j = 0; j < gridWidth; j++) {
       const index = rowIndex * gridWidth + j;
@@ -69,10 +71,10 @@ export default function GridField({
     return (
       <tr 
         key={`row-${rowIndex}`} 
-        className={`grid-row ${schemeType === 'peyote' ? 'peyote-row' : ''}`}
+        className={`grid-row ${schemeType === SchemaType.Peyote ? 'peyote-row' : ''}`}
         style={{
           height: `${cellSize}px`,
-          left: schemeType === 'peyote' && isEvenRow ? `${cellSize/2}px` : '0'
+          left: (schemeType === SchemaType.Peyote && !isEvenRow) ? `${cellSize/2}px` : '0'
         }}
       >
         {cells}
@@ -80,7 +82,6 @@ export default function GridField({
     );
   };
 
-  console.log(markedColumns);
   const rows = [];
   for (let i = 0; i < gridHeight; i++) {
     rows.push(renderRow(i));

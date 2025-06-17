@@ -15,6 +15,7 @@ import './create-form-modal.css';
 import { useAppDispatch } from 'hooks/use-app-dispatch';
 import { createSchemaAction } from 'store/api-actions/schema-api-actions';
 import { SchemaCreate } from 'types/schema-create';
+import { SchemaType } from 'types/schema-preview';
 
 interface CreateFormModalProps {
   onClose: () => void;
@@ -26,7 +27,7 @@ export default function CreateFormModal({ onClose }: CreateFormModalProps) {
   const [width, setWidth] = useState(20);
   const [height, setHeight] = useState(20);
   const [schemeName, setSchemeName] = useState('');
-  const [schemeType, setSchemeType] = useState<'square' | 'peyote' | ''>('');
+  const [schemeType, setSchemeType] = useState<SchemaType | ''>('');
   const [isNameError, setIsNameError] = useState(false);
   const [isTypeError, setIsTypeError] = useState(false);
 
@@ -216,18 +217,18 @@ export default function CreateFormModal({ onClose }: CreateFormModalProps) {
             <Box className="scheme-type-buttons" sx={{ display: 'flex', gap: '8px' }}>
               <Button
                 text='Square'
-                variant={schemeType === 'square' ? 'save' : 'save-transparent'}
+                variant={schemeType === SchemaType.Square ? 'save' : 'save-transparent'}
                 onClick={() => {
-                  setSchemeType('square');
+                  setSchemeType(SchemaType.Square);
                   setIsTypeError(false);
                 }}
                 className="scheme-type-button"
               />
               <Button
                 text='Peyote'
-                variant={schemeType === 'peyote' ? 'save' : 'save-transparent'}
+                variant={schemeType === SchemaType.Peyote ? 'save' : 'save-transparent'}
                 onClick={() => {
-                  setSchemeType('peyote');
+                  setSchemeType(SchemaType.Peyote);
                   setIsTypeError(false); 
                 }}
                 className="scheme-type-button"

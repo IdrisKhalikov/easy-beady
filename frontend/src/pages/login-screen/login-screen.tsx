@@ -73,7 +73,7 @@ export default function LoginPage() {
 
   // TODO: Переделать на нормальный редирект без захардкоженных url-ов, чтобы на проде тоже работало
   const handleGoogleLogin = () => {
-    window.location.replace(BACKEND_URL + ApiRoute.GoogleLogin + '?returnUrl=' + APP_URL)
+    window.location.replace(BACKEND_URL + ApiRoute.GoogleLogin + `?returnUrl=${APP_URL}`)
   };
 
   if(authStatus == AuthorizationStatus.Auth) {

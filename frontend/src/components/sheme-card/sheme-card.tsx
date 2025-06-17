@@ -6,6 +6,9 @@ import { CompletionStatus, SchemaPreview } from 'types/schema-preview';
 import { useNavigate } from 'react-router-dom';
 import { useCallback } from 'react';
 
+function roundProgressValue(progress: number) {
+  return progress.toFixed(2);
+}
 interface SchemeCardProps {
   schema: SchemaPreview
   onDelete: () => void;
@@ -25,10 +28,10 @@ export default function SchemeCard({ schema, onDelete }: SchemeCardProps) {
   }, [onDelete]);
 
   const progress = schema.linesCompleted.reduce((acc, c) => (c ? acc + 1 : acc), 0) * 100 / schema.width;
-  const status = progress == 100 ? CompletionStatus.Done : CompletionStatus.InProgress;
+  const status = progress === 100 ? CompletionStatus.Done : CompletionStatus.InProgress;
 
   return (
-    <div className={`card card--${status == CompletionStatus.Done ? 'done' : 'in-progress'}`} onClick={redirectToEditPage}>
+    <div className={`card card--${status === CompletionStatus.Done ? 'done' : 'in-progress'}`} onClick={redirectToEditPage}>
       <div className="card__header">
         <h3 className="card__title">{schema.name}</h3>
           <IconButton
@@ -52,8 +55,8 @@ export default function SchemeCard({ schema, onDelete }: SchemeCardProps) {
       </div>
 
       <div className={`progress-bar ${status !== CompletionStatus.InProgress ? 'progress-bar--disabled' : ''}`}>
-        <div className="progress-bar__fill" style={{ width: `${progress}%` }}></div>
-        <span className="progress-bar__text">{`${progress}%`}</span>
+        <div className="progress-bar__fill" style={{ width: `${roundProgressValue(progress)}%` }}></div>
+        <span className="progress-bar__text">{`${roundProgressValue(progress)}%`}</span>
       </div>
 
       {status === CompletionStatus.Done && (

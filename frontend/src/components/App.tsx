@@ -1,8 +1,7 @@
-import { BrowserRouter, Route, Routes, useNavigate } from 'react-router-dom';
+import { BrowserRouter, Route, Routes } from 'react-router-dom';
 import { AppRoute } from '../const';
 import MainScreen from '../pages/main-screen/main-screen';
 import LoginScreen from '../pages/login-screen/login-screen';
-import ShemeEditScreen from '../pages/sheme-screen/sheme-edit';
 // import ShemeDoScreen from '../pages/sheme-screen/sheme-do';
 import NotFoundScreen from '../pages/not-found-screen';
 import { JSX } from 'react';

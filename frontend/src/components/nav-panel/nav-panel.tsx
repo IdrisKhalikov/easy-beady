@@ -9,11 +9,12 @@ import SaveIcon from '@mui/icons-material/Save';
 import EditIcon from '@mui/icons-material/Edit';
 import Grid4x4Icon from '@mui/icons-material/Grid4x4';
 import './nav-panel.css';
+import { EditorMode } from 'pages/sheme-screen/editor-mode';
 
 type NavigationPanelProps = {
   title: string;
-  selectedOption: 'edit' | 'weave';
-  onOptionChange: (option: 'edit' | 'weave') => void;
+  selectedOption: EditorMode;
+  onOptionChange: (option: EditorMode) => void;
   onSave: () => void;
   onRestart: () => void;
 };
@@ -55,14 +56,14 @@ export default function NavigationPanel({
       <div className="nav-panel">
         <div className="mode-toggle">
           <button
-            className={`mode-toggle__button ${selectedOption === 'edit' ? 'active' : ''}`}
-            onClick={() => onOptionChange('edit')}
+            className={`mode-toggle__button ${selectedOption === EditorMode.Edit ? 'active' : ''}`}
+            onClick={() => onOptionChange(EditorMode.Edit)}
           >
             <EditIcon fontSize="small" />
           </button>
           <button
-            className={`mode-toggle__button ${selectedOption === 'weave' ? 'active' : ''}`}
-            onClick={() => onOptionChange('weave')}
+            className={`mode-toggle__button ${selectedOption === EditorMode.Weave ? 'active' : ''}`}
+            onClick={() => onOptionChange(EditorMode.Weave)}
           >
             <Grid4x4Icon fontSize="small" />
           </button>

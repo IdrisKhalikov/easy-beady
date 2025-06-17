@@ -8,8 +8,24 @@ export function gridToApiFormat(grid: Cell[]): CellColor[] {
 
 export function gridFromApiFormat(apiGrid: CellColor[]): Cell[] {
     return apiGrid.map((c, i) => ({
-        id: i,
+        id: i+1,
         color: colorToHexStr(c),
         isSelected: false
     }));
+}
+
+export function changeGridWidth(grid: Cell[], prevWidth: number, newWidth: number): Cell[] {
+    let newGrid = [];
+    let curId = 1;
+    for(let i = 0; i < grid.length;) {
+        for(let j = 0; j < prevWidth; j++, i++, curId++) {
+            newGrid.push({...grid[i], id: curId });
+        }
+
+        for(let j = prevWidth; j < newWidth; j++, curId++) {
+            newGrid.push({id: curId, color: '#ffffff', isSelected: false})
+        }
+    }
+
+    return newGrid;
 }
