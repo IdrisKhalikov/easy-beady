@@ -23,4 +23,6 @@ export enum NameSpace {
   Schema = 'Schema',
 }
 
-export const APP_URL = "http://localhost:3000/"
+export const BASE_URL = window.location.hostname;
+
+export const APP_URL = `http://${BASE_URL}:3000/`

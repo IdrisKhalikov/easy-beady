@@ -32,7 +32,7 @@
     position: relative;
 }
 
-.peyote-grid .peyote-row {
+.grid-row.peyote-row {
     position: relative;
     margin-bottom: -1px;
 }

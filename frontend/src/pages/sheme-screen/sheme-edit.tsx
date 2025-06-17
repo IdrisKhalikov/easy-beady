@@ -17,8 +17,9 @@ import Spinner from 'components/spinner/spinner';
 import { Schema } from 'types/schema';
 import { SchemaType } from 'types/schema-preview';
 import { SchemaUpdate } from 'types/schema-update';
-import { gridFromApiFormat, gridToApiFormat } from 'utils/grid';
+import { changeGridWidth, gridFromApiFormat, gridToApiFormat } from 'utils/grid';
 import { AppRoute } from 'const';
+import { EditorMode } from './editor-mode';
 
 
 type ColumnState = {
@@ -57,11 +58,11 @@ type ShemeEditScreenProps = {
 }
 
 function ShemeEditScreen({schema}: ShemeEditScreenProps): JSX.Element {
-  const { name, schemaType, width, height } = schema.info;
+  const { name, schemaType, width, height, linesCompleted } = schema.info;
   const initialGridState = useMemo(() => gridFromApiFormat(schema.data), [schema]);
   const dispatch = useAppDispatch();
 
-  const [selectedOption, setSelectedOption] = useState<'edit' | 'weave'>('edit');
+  const [selectedOption, setSelectedOption] = useState<EditorMode>(EditorMode.Edit);
   const [gridWidth, setGridWidth] = useState(width);
   const [gridHeight, setGridHeight] = useState(height);
   const [backgroundColor, setBackgroundColor] = useState('#ffffff');
@@ -71,7 +72,7 @@ function ShemeEditScreen({schema}: ShemeEditScreenProps): JSX.Element {
   const [fillActive, setFillActive] = useState(false);
   const [zoomLevel, setZoomLevel] = useState(100);
   const [schemeType, setSchemeType] = useState<SchemaType>(schemaType);
-  const [markedColumns, setMarkedColumns] = useState<ColumnState>({...schema.info.linesCompleted});
+  const [markedColumns, setMarkedColumns] = useState<ColumnState>({...linesCompleted});
 
   const cellSize = 15;
   const colorPickerRef = useRef<HTMLInputElement>(null);
@@ -101,7 +102,7 @@ function ShemeEditScreen({schema}: ShemeEditScreenProps): JSX.Element {
   };
 
   const handleCellClick = (cellId: number) => {
-    if (selectedOption === 'edit') {
+    if (selectedOption === EditorMode.Edit) {
       if (brushActive) {
         setGrid(prevGrid => 
           prevGrid.map(cell => {
@@ -115,7 +116,7 @@ function ShemeEditScreen({schema}: ShemeEditScreenProps): JSX.Element {
           })
         );
       }
-    } else if (selectedOption === 'weave') {
+    } else if (selectedOption === EditorMode.Weave) {
       const columnIndex = (cellId - 1) % gridWidth;
       setMarkedColumns(prev => ({
         ...prev,
@@ -145,7 +146,7 @@ function ShemeEditScreen({schema}: ShemeEditScreenProps): JSX.Element {
         color: backgroundColor
       }))
     );
-    if (selectedOption === 'weave') {
+    if (selectedOption === EditorMode.Weave) {
       setMarkedColumns({});
     }
   };
@@ -153,20 +154,18 @@ function ShemeEditScreen({schema}: ShemeEditScreenProps): JSX.Element {
   const handleRestart = () => {
     setGridWidth(width);
     setGridHeight(height);
+    setGrid(initialGridState);
     setBackgroundColor('#ffffff');
     setShapeColor('#0000ff');
     setBrushActive(false);
     setFillActive(false);
     setZoomLevel(100);
     setSchemeType(schemaType);
-    setMarkedColumns({});
+    setMarkedColumns(linesCompleted);
   };
 
-  const handleOptionChange = (option: 'edit' | 'weave') => {
+  const handleOptionChange = (option: EditorMode) => {
     setSelectedOption(option);
-    if (option === 'edit') {
-      setMarkedColumns({});
-    }
   };
 
   const handleBrushClick = () => {
@@ -180,8 +179,8 @@ function ShemeEditScreen({schema}: ShemeEditScreenProps): JSX.Element {
   };
 
   const handleSave = useCallback(() => {
-    const linesCompleted = Array(width);
-    for(let i = 0; i< width; i++) {
+    const linesCompleted = Array(gridWidth);
+    for(let i = 0; i < gridWidth; i++) {
       if(markedColumns.hasOwnProperty(i)) {
         linesCompleted[i] = markedColumns[i];
       } else {
@@ -190,8 +189,8 @@ function ShemeEditScreen({schema}: ShemeEditScreenProps): JSX.Element {
     }
     const schemaUpdate: SchemaUpdate = {
       name,
-      width,
-      height,
+      width: gridWidth,
+      height: gridHeight,
       linesCompleted: linesCompleted,
       data: gridToApiFormat(grid)
     }
@@ -200,7 +199,7 @@ function ShemeEditScreen({schema}: ShemeEditScreenProps): JSX.Element {
   }, [dispatch, markedColumns, schema, grid]);
 
   useEffect(() => {
-    if(selectedOption == 'weave') {
+    if(selectedOption == EditorMode.Weave) {
       const interval = setInterval(() => {
         handleSave();
       }, 15_000);
@@ -220,7 +219,7 @@ function ShemeEditScreen({schema}: ShemeEditScreenProps): JSX.Element {
           onRestart={handleRestart}
         />
         
-        {selectedOption === 'edit' && (
+        {selectedOption === EditorMode.Edit && (
           <div className="edit-panel">
             <div className="tool-group">
               <input
@@ -293,6 +292,7 @@ function ShemeEditScreen({schema}: ShemeEditScreenProps): JSX.Element {
                   onChange={(e) => {
                     const value = parseInt(e.target.value);
                     if (!isNaN(value) && value >= 10 && value <= 200) {
+                      setGrid(changeGridWidth(grid, gridWidth, value));
                       setGridWidth(value);
                     }
                   }}
