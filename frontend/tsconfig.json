@@ -15,11 +15,6 @@
     "forceConsistentCasingInFileNames": true,
     "noFallthroughCasesInSwitch": true,
     "module": "esnext",
-    // "paths": {
-    //   "@components/*": ["src/components/*"],
-    //   "@pages/*": ["src/pages/*"],
-    //   "@const": ["src/const"],
-    // },
     "moduleResolution": "node",
     "resolveJsonModule": true,
     "isolatedModules": true,
