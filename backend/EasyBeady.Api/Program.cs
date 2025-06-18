@@ -87,7 +87,7 @@ if (app.Environment.IsDevelopment())
 
 app.UseHttpsRedirection();
 app.UseRouting();
-app.UseCors(options => options.AllowAnyMethod().AllowAnyHeader().AllowCredentials().WithOrigins("http://localhost:3000"));
+app.UseCors(options => options.AllowAnyMethod().AllowAnyHeader().AllowCredentials().WithOrigins("http://*:3000"));
 app.UseAuthentication();
 app.UseAuthorization();
 app.MapControllers();
@@ -95,4 +95,4 @@ app.MapControllers();
 app.MapGroup("/api/account").MapIdentityApi<AppUser>();
 
 app.UseHttpsRedirection();
-app.Run("https://localhost:7291");
+app.Run("https://*:7291");
