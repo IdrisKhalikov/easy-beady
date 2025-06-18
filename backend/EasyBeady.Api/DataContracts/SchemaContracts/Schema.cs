@@ -1,5 +1,6 @@
 using System.Drawing;
 using System.Runtime.Serialization;
+using SixLabors.ImageSharp.PixelFormats;
 
 namespace EasyBeady.Api.DataContracts.SchemaContracts;
 
@@ -10,5 +11,5 @@ public class Schema
     public SchemaInfo Info { get; set; }
 
     [DataMember(Name = "data")]
-    public Color[] Data { get; set; }
+    public Rgba32[] Data { get; set; }
 }

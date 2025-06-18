@@ -2,6 +2,7 @@ using System.ComponentModel.DataAnnotations;
 using System.Drawing;
 using System.Runtime.Serialization;
 using Newtonsoft.Json;
+using SixLabors.ImageSharp.PixelFormats;
 
 namespace EasyBeady.Api.DataContracts.SchemaContracts;
 
@@ -23,5 +24,5 @@ public class SchemaUpdate
 
     [JsonProperty(ItemConverterType = typeof(ColorConverter))]
     [DataMember(Name = "data")]
-    public Color[]? Data { get; set; }
+    public Rgba32[]? Data { get; set; }
 }

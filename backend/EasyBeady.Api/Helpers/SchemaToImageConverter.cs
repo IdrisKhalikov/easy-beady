@@ -1,24 +1,26 @@
-using System.Drawing;
-using System.Drawing.Imaging;
 using System.Runtime.InteropServices;
 using EasyBeady.Api.DataContracts.SchemaContracts;
+using SixLabors.ImageSharp;
+using SixLabors.ImageSharp.Formats.Bmp;
+using SixLabors.ImageSharp.Formats.Png;
+using SixLabors.ImageSharp.PixelFormats;
 
 namespace EasyBeady.Api.Helpers;
 
 public static class SchemaToImageConverter
 {
-    public static MemoryStream MakeImage(Color[] colors, int originalWidth, int originalHeight, SchemaType type)
+    public static MemoryStream MakeImage(Rgba32[] colors, int originalWidth, int originalHeight, SchemaType type)
     {
-        var defaultColor = Color.White.ToArgb();
+        var defaultColor = Color.White.ToPixel<Rgba32>();
 
         const int height = 200;
-        int[,] newColors;
+        Rgba32[,] newColors;
         if (type == SchemaType.Square)
         {
-            newColors = new int[originalHeight, originalWidth];
+            newColors = new Rgba32[originalHeight, originalWidth];
             for(var x = 0 ; x < originalWidth ; x++)
                 for (var y = 0 ; y < originalHeight ; y++)
-                    newColors[y, x] = colors[x + y * originalWidth].ToArgb();
+                    newColors[y, x] = colors[x + y * originalWidth];
         }
         else
         {
@@ -28,7 +30,7 @@ public static class SchemaToImageConverter
             originalWidth = originalWidth * 2 + 1;
             originalHeight *= 2;
 
-            newColors = new int[originalHeight, originalWidth];
+            newColors = new Rgba32[originalHeight, originalWidth];
 
             for (var x = 0; x < originalWidth; x++)
             {
@@ -38,13 +40,13 @@ public static class SchemaToImageConverter
                     if (colorY % 2 == 0)
                     {
                         newColors[y, x] = x / 2 < initX
-                            ? colors[x / 2 + colorY * initX].ToArgb()
+                            ? colors[x / 2 + colorY * initX]
                             : defaultColor;
                     }
                     else
                     {
                         newColors[y, x] = x - 1 >= 0
-                            ? colors[(x - 1) / 2 + colorY * initX].ToArgb()
+                            ? colors[(x - 1) / 2 + colorY * initX]
                             : defaultColor;
                     }
                 }
@@ -54,7 +56,7 @@ public static class SchemaToImageConverter
         var ratio = (double)originalHeight / height;
         var width = (int)(originalWidth / ratio);
 
-        int[,] resized = new int[height, width];
+        var resized = new Rgba32[height * width];
 
         for (int y = 0; y < height; y++)
         {
@@ -65,25 +67,14 @@ public static class SchemaToImageConverter
             { 
                 var srcX = (int)(x * ratio);
                 srcX = Math.Min(srcX, originalWidth - 1);
-                resized[y, x] = newColors[srcY, srcX];
+                resized[y * width + x] = newColors[srcY, srcX];
             }
         }
-            
-        var rgbValues = resized.Cast<int>().ToArray();
 
-        var bitmap = new Bitmap(width, height, PixelFormat.Format24bppRgb);
-        var bitmapData = bitmap.LockBits(
-            new Rectangle(0, 0, width, height),
-            ImageLockMode.WriteOnly,
-            PixelFormat.Format32bppArgb
-        );
-
-        Marshal.Copy(rgbValues, 0, bitmapData.Scan0, rgbValues.Length);
-        bitmap.UnlockBits(bitmapData);
+        var bitmap = Image.LoadPixelData<Rgba32>(resized, width, height);
 
         var memoryStream = new MemoryStream();
-        bitmap.Save(memoryStream, ImageFormat.Png);
-        
+        bitmap.Save(memoryStream, new PngEncoder());
         return memoryStream;
     }
 }

@@ -95,4 +95,4 @@ app.MapControllers();
 app.MapGroup("/api/account").MapIdentityApi<AppUser>();
 
 app.UseHttpsRedirection();
-app.Run("https://localhost:7291");
+app.Run("https://*:7291");

@@ -1,10 +1,11 @@
 using System.Drawing;
+using SixLabors.ImageSharp.PixelFormats;
 
 namespace EasyBeady.Api.Helpers;
 
 public static class SchemaConverter
 {
-    public static byte[] ToBinary(Color[] schema)
+    public static byte[] ToBinary(Rgba32[] schema)
     {
         var resultStream = new MemoryStream();
         for(var i = 0; i < schema.Length; i++)
@@ -13,29 +14,26 @@ public static class SchemaConverter
         return resultStream.ToArray();
     }
 
-    public static Color[] FromBinary(byte[] data)
+    public static Rgba32[] FromBinary(byte[] data)
     {
         var stream = new MemoryStream(data);
-        var schema = new Color[data.Length / 3];
+        var schema = new Rgba32[data.Length / 3];
         for (var i = 0; i < schema.Length; i++)
             schema[i] = ReadColor(stream);
 
         return schema;
     }
 
-    private static void WriteColor(MemoryStream stream, Color color)
+    private static void WriteColor(MemoryStream stream, Rgba32 color)
     {
-        var colorValue = color.ToArgb();
-        stream.WriteByte((byte)(colorValue >> 16));
-        stream.WriteByte((byte)(colorValue >> 8));
-        stream.WriteByte((byte)colorValue);
+        stream.WriteByte(color.B);
+        stream.WriteByte(color.G);
+        stream.WriteByte(color.R);
     }
 
-    private static Color ReadColor(MemoryStream stream)
+    private static Rgba32 ReadColor(MemoryStream stream)
     {
-        var colorValue =  stream.ReadByte() << 16
-                          | stream.ReadByte() << 8
-                          | stream.ReadByte();
-        return Color.FromArgb(colorValue);
+        var (b,g,r) = (stream.ReadByte(), stream.ReadByte(), stream.ReadByte());
+        return new Rgba32(r,g,b);
     }
 }
