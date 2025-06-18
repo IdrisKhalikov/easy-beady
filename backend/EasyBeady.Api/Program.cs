@@ -37,7 +37,9 @@ if (builder.Configuration.GetValue<bool>("UseGoogleAuth"))
         });
 }
     
-builder.Services.AddAuthorization();
+builder.Services
+    .AddCors()
+    .AddAuthorization();
 
 
 if (builder.Environment.IsDevelopment())
@@ -85,9 +87,9 @@ if (app.Environment.IsDevelopment())
     app.UseSwaggerUI(options => options.SwaggerEndpoint("https://localhost:7291/swagger/v1/swagger.json", "v1"));
 }
 
-app.UseHttpsRedirection();
+//app.UseHttpsRedirection();
 app.UseRouting();
-app.UseCors(options => options.AllowAnyMethod().AllowAnyHeader().AllowCredentials().WithOrigins("http://localhost:3000"));
+app.UseCors(options => options.AllowAnyMethod().AllowAnyHeader().AllowCredentials().WithOrigins("http://192.168.31.170:3000"));
 app.UseAuthentication();
 app.UseAuthorization();
 app.MapControllers();
@@ -95,4 +97,4 @@ app.MapControllers();
 app.MapGroup("/api/account").MapIdentityApi<AppUser>();
 
 app.UseHttpsRedirection();
-app.Run("https://*:7291");
+app.Run("http://*:7291");

@@ -26,14 +26,13 @@ public static class SchemaConverter
 
     private static void WriteColor(MemoryStream stream, Rgba32 color)
     {
-        stream.WriteByte(color.B);
-        stream.WriteByte(color.G);
         stream.WriteByte(color.R);
+        stream.WriteByte(color.G);
+        stream.WriteByte(color.B);
     }
 
     private static Rgba32 ReadColor(MemoryStream stream)
     {
-        var (b,g,r) = (stream.ReadByte(), stream.ReadByte(), stream.ReadByte());
-        return new Rgba32(r,g,b);
+        return new Rgba32((byte)stream.ReadByte(), (byte)stream.ReadByte(), (byte)stream.ReadByte());
     }
 }

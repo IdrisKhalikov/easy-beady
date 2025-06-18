@@ -39,8 +39,11 @@ export default function LoginPage() {
 	};
 
 	const handleRegister = async () => {
-		const credentials: Credentials = { email, password };
-		await dispatch(registerAction(credentials)).unwrap();
+		try{
+			const credentials: Credentials = { email, password };
+			await dispatch(registerAction(credentials)).unwrap();
+		} catch {
+		}
 	};
 
 	const handleLogin = async () => {
