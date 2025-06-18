@@ -39,45 +39,15 @@ export default function LoginPage() {
 	};
 
 	const handleRegister = async () => {
-		let isValid = true;
-
-		if (!email) {
-			setEmailError('Пожалуйста, введите email');
-			isValid = false;
-		} else if (!validateEmail(email)) {
-			setEmailError('Введите корректный email');
-			isValid = false;
-		} else {
-			setEmailError('');
-		}
-
-		if (!password) {
-			setPasswordError('Пожалуйста, введите пароль');
-			isValid = false;
-		} else if (!validatePassword(password)) {
-			setPasswordError('Пароль должен содержать буквы и цифры');
-			isValid = false;
-		} else {
-			setPasswordError('');
-		}
-
-		if (isValid) {
-			try {
-				const credentials: Credentials = { email, password };
-				await dispatch(registerAction(credentials)).unwrap();
-				toast.success('Регистрация прошла успешно!');
-			} catch (error: any) {
-				toast.error(error.message || 'Ошибка регистрации');
-			}
-		}
+		const credentials: Credentials = { email, password };
+		await dispatch(registerAction(credentials)).unwrap();
 	};
 
 	const handleLogin = async () => {
-		try {
+		try{
 			const credentials: Credentials = { email, password };
 			await dispatch(loginAction(credentials)).unwrap();
-		} catch (error: any) {
-			toast.error(error.message || 'Ошибка входа');
+		} catch{
 		}
 	};
 
@@ -103,13 +73,6 @@ export default function LoginPage() {
 							placeholder="Введите ваш email"
 							value={email}
 							onChange={(e) => setEmail(e.target.value)}
-							onBlur={() => {
-								if (email && !validateEmail(email)) {
-									setEmailError('Введите корректный email');
-								} else {
-									setEmailError('');
-								}
-							}}
 						/>
 						{emailError && <div className="error-message">{emailError}</div>}
 					</div>
@@ -122,13 +85,6 @@ export default function LoginPage() {
 								placeholder="Введите ваш пароль"
 								value={password}
 								onChange={(e) => setPassword(e.target.value)}
-								onBlur={() => {
-									if (password && !validatePassword(password)) {
-										setPasswordError('Пароль должен содержать хотя бы 1 букву и цифру');
-									} else {
-										setPasswordError('');
-									}
-								}}
 							/>
 							{showPassword ? (
 								<Visibility
