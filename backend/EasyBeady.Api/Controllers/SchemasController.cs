@@ -8,6 +8,8 @@ using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.Extensions.Internal;
+using SixLabors.ImageSharp.PixelFormats;
+using Color = SixLabors.ImageSharp.Color;
 
 namespace EasyBeady.Api.Controllers;
 
@@ -60,7 +62,7 @@ public class SchemasController : ControllerBase
 
         var nowStr = systemClock.UtcNow.ToSortableDateString();
 
-        var schemaArr = new Color[schemaCreate.Width * schemaCreate.Height];
+        var schemaArr = new Rgba32[schemaCreate.Width * schemaCreate.Height];
         schemaArr.AsSpan().Fill(Color.White);
 
         var schema = new Schema
